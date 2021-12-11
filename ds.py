@@ -1,6 +1,7 @@
 """
 This file contains my own versions of all the common data structures which \
-        I am writing for my own personal study
+I am writing for my own personal study. I'm following the programiz tutorial \
+at https://www.programiz.com/dsa
 """
 
 class Stack():
@@ -102,7 +103,6 @@ class Queue():
     def __iter__(self):
         return (x for x in self.data)
 
-# CIRCULAR QUEUE, enqueue, dequeue, is_empty, is_full, peek, extend
 class CircularQueue():
     """
     FIFO Queue with circular implementation.
@@ -178,23 +178,112 @@ class CircularQueue():
                 yield self.data[i]
             i = (i + 1) % self.size
 
+class Node():
+    def __init__(self, value, depth, parent):
+        self.value = value
+        self.l = self.r = None
+        self.depth = depth
+        self.parent = parent
+    def add(self, value):
+        print(self.display(), "-->", value)
+        if self.l == None:
+            self.l = Node(value, self.depth + 1, self)
+            return self.depth + 1
+        elif self.r == None:
+            self.r = Node(value, self.depth + 1, self)
+            return self.depth + 1
+        elif self.is_perfect():
+            return self.l.add(value)
+        elif self.l.is_perfect():
+            return self.r.add(value)
+        else:
+            return self.l.add(value)
+    def get_height(self):
+        if self.l == None and self.r == None:
+            return 0
+        lh = rh = 0
+        if self.l != None:
+            lh = 1 + self.l.get_height()
+        if self.r != None:
+            rh = 1 + self.r.get_height()
+        return max(lh, rh)
+    def is_perfect(self):
+        # Height of 0
+        if self.l == None and self.r == None:
+            return True
+        # Only one child
+        if self.l == None or self.r == None:
+            return False
+        # Both children have same height
+        if self.l.get_height() == self.get_height() -1 \
+                and self.r.get_height() == self.get_height() -1:
+            return self.l.is_perfect() and self.r.is_perfect()
+        return False
+    def __str__(self):
+        return str(self.value)
+    def display(self):
+        l = self.l.display() + " " if self.l != None else ""
+        r = " " + self.r.display() if self.r != None else ""
+        return l + str(self) + r
+
+class BinaryTree():
+    """
+    >>> tree = BinaryTree()
+    >>> tree.add(5)
+    >>> tree.add(7)
+    >>> tree.add(3)
+    >>> print(tree)
+    7, 5, 3
+    >>> tree.get_levels()
+    [[5], [7, 3]]
+    """
+    def __init__ (self):
+        self.height = 0
+        self.root = None
+    def add(self, value):
+        if self.root == None:
+            self.root = Node(value, 1, None)
+            self.height = 1
+        else:
+            h = self.root.add(value)
+            self.height = max(h, self.height)
+    def extend(self, values):
+        for v in values:
+            self.add(v)
+    def get_levels(self):
+        output = [[] for _ in range(self.height)]
+        for node in self:
+            output[node.depth - 1].append(node)
+        return output
+    def display(self):
+        for level in self.get_levels():
+            print(" ".join(str(node) for node in level))
+    def is_perfect(self):
+        return self.root.is_perfect()
+    def __iter__(self):
+        def flatten(node):
+            if node.l != None:
+                for n in flatten(node.l):
+                    yield n
+            yield node
+            if node.r != None:
+                for n in flatten(node.r):
+                    yield n
+        return flatten(self.root)
+    def __str__(self):
+        return ", ".join(str(node.value) for node in self)
+
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+    #import doctest
+    #doctest.testmod()
+    tree = BinaryTree()
+    for x in range(50):
+        tree.add(x)
+        if tree.is_perfect():
+            print()
+            tree.display()
+            print()
     
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
