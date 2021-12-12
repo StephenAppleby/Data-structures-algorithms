@@ -178,19 +178,21 @@ class CircularQueue():
                 yield self.data[i]
             i = (i + 1) % self.size
 
-class Node():
+class BTNode():
     def __init__(self, value, depth, parent):
         self.value = value
         self.l = self.r = None
         self.depth = depth
         self.parent = parent
     def add(self, value):
-        print(self.display(), "-->", value)
+        # Adds nodes in a way which tends towards perfect trees such that 
+        # as long as nodes are only added and not removed, a tree constructed
+        # with this method will always be complete
         if self.l == None:
-            self.l = Node(value, self.depth + 1, self)
+            self.l = BTNode(value, self.depth + 1, self)
             return self.depth + 1
         elif self.r == None:
-            self.r = Node(value, self.depth + 1, self)
+            self.r = BTNode(value, self.depth + 1, self)
             return self.depth + 1
         elif self.is_perfect():
             return self.l.add(value)
@@ -198,6 +200,9 @@ class Node():
             return self.r.add(value)
         else:
             return self.l.add(value)
+    def extend(self, values):
+        for v in values:
+            self.add(v)
     def get_height(self):
         if self.l == None and self.r == None:
             return 0
@@ -219,71 +224,74 @@ class Node():
                 and self.r.get_height() == self.get_height() -1:
             return self.l.is_perfect() and self.r.is_perfect()
         return False
+    def is_full(self):
+        if self.l == None and self.r == None:
+            return True
+        if self.l != None and self.r != None:
+            return is_f(self.l) and is_f(self.r)
+        return False
+    def is_complete(self):
+        if self.l == None and self.r == None:
+            return True
+        if self.l == None and self.r != None:
+            return False
+        rc = self.r.is_complete() if self.r != None else True
+        return self.l.is_complete() and rc
     def __str__(self):
         return str(self.value)
-    def display(self):
-        l = self.l.display() + " " if self.l != None else ""
-        r = " " + self.r.display() if self.r != None else ""
-        return l + str(self) + r
+    def to_dict(self):
+        d = {"v": self.value}
+        if self.l != None:
+            d["l"] = self.l.to_dict()
+        if self.r != None:
+            d["r"] = self.r.to_dict()
+        return d
+    def flatten(self):
+        if self.l != None:
+            for n in self.l.flatten():
+                yield n
+        yield self
+        if self.r != None:
+            for n in self.r.flatten():
+                yield n
+    def preorder(self):
+        yield self
+        if self.l != None:
+            for n in self.l.preorder():
+                yield n
+        if self.r != None:
+            for n in self.r.preorder():
+                yield n
+    def postorder(self):
+        if self.l != None:
+            for n in self.l.postorder():
+                yield n
+        if self.r != None:
+            for n in self.r.postorder():
+                yield n
+        yield self
 
-class BinaryTree():
-    """
-    >>> tree = BinaryTree()
-    >>> tree.add(5)
-    >>> tree.add(7)
-    >>> tree.add(3)
-    >>> print(tree)
-    7, 5, 3
-    >>> tree.get_levels()
-    [[5], [7, 3]]
-    """
-    def __init__ (self):
-        self.height = 0
-        self.root = None
-    def add(self, value):
-        if self.root == None:
-            self.root = Node(value, 1, None)
-            self.height = 1
-        else:
-            h = self.root.add(value)
-            self.height = max(h, self.height)
-    def extend(self, values):
-        for v in values:
-            self.add(v)
-    def get_levels(self):
-        output = [[] for _ in range(self.height)]
-        for node in self:
-            output[node.depth - 1].append(node)
-        return output
-    def display(self):
-        for level in self.get_levels():
-            print(" ".join(str(node) for node in level))
-    def is_perfect(self):
-        return self.root.is_perfect()
-    def __iter__(self):
-        def flatten(node):
-            if node.l != None:
-                for n in flatten(node.l):
-                    yield n
-            yield node
-            if node.r != None:
-                for n in flatten(node.r):
-                    yield n
-        return flatten(self.root)
-    def __str__(self):
-        return ", ".join(str(node.value) for node in self)
+def get_levels(node):
+    output = [[] for _ in range(node.get_height() + 1)]
+    for n in node.flatten():
+        output[n.depth].append(n)
+    return output
+
+def display_crude(node):
+    for level in get_levels(node):
+        print(" ".join(str(node) for node in level))
 
 if __name__ == "__main__":
     #import doctest
     #doctest.testmod()
-    tree = BinaryTree()
-    for x in range(50):
+    tree = BTNode(0, 0, None)
+    for x in range(1, 8):
         tree.add(x)
-        if tree.is_perfect():
-            print()
-            tree.display()
-            print()
-    
+        display_crude(tree)
+        print()
+
+
+
 
 
 
