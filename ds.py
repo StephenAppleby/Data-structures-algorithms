@@ -1,3 +1,4 @@
+import math
 """
 This file contains my own versions of all the common data structures which \
 I am writing for my own personal study. I'm following the programiz tutorial \
@@ -135,6 +136,8 @@ class CircularQueue():
     >>> queue.enqueue(8)
     >>> print(queue)
     [8, None, 6]
+    >>> print(len(queue))
+    2
     >>> queue.peek()
     6
     >>> for x in queue: print(x * 2)
@@ -151,13 +154,15 @@ class CircularQueue():
         return (self.head - self.tail) % self.size == 1
     def enqueue(self, x):
         if self.is_full():
-            raise Exception("Queue full, cannot enqueue")
+            self.handle_full()
         if self.head == -1:
             self.head = self.tail = 0
             self.data[self.tail] = x
         else:
             self.tail = (self.tail + 1) % self.size
             self.data[self.tail] = x
+    def handle_full(self):
+        raise Exception("Queue full, cannot enqueue")
     def dequeue(self):
         if self.is_empty():
             raise Exception("Queue empty, cannot dequeue")
@@ -171,127 +176,196 @@ class CircularQueue():
         for x in arr: self.enqueue(x)
     def __str__(self):
         return str(self.data)
+    def __len__(self):
+        return len([x for x in self if x != None])
     def __iter__(self):
         i = self.head
         for x in range(self.size):
-            if self.data[i] != None:
+            if self.data[i]:
                 yield self.data[i]
             i = (i + 1) % self.size
 
+class DCQueue(CircularQueue):
+    """Dynamic implementation of CircularQueue.
+
+    >>> dcqueue = DCQueue(size=3)
+    >>> dcqueue.enqueue(3)
+    >>> print(dcqueue)
+    [3, None, None]
+    >>> dcqueue.extend([x for x in range(4)])
+    >>> print(dcqueue)
+    [3, 0, 1, 2, 3, None]
+    """
+    def handle_full(self):
+        old_data = []
+        while len(self) > 0:
+            old_data.append(self.dequeue())
+        self.size *= 2
+        self.data = [None] * self.size
+        self.head = self.tail = -1
+        for d in old_data:
+            self.enqueue(d)
+
 class BTNode():
-    def __init__(self, value, depth, parent):
+    def __init__(self, value, depth=0, parent=None):
         self.value = value
         self.l = self.r = None
         self.depth = depth
         self.parent = parent
     def add(self, value):
-        # Adds nodes in a way which tends towards perfect trees such that 
-        # as long as nodes are only added and not removed, a tree constructed
-        # with this method will always be complete
-        if self.l == None:
-            self.l = BTNode(value, self.depth + 1, self)
+        for node in self.breadth_first():
+            if not node.l:
+                node.l = BTNode(value, depth=node.depth + 1, parent=node)
+                return node.depth + 1
+            if not node.r:
+                node.r = BTNode(value, depth=node.depth + 1, parent=node)
+                return node.depth + 1
+    def add_l(self, value):
+        if not self.l:
+            self.l = BTNode(value, depth=self.depth + 1, parent=self)
             return self.depth + 1
-        elif self.r == None:
-            self.r = BTNode(value, self.depth + 1, self)
+        return self.l.add_l(value)
+    def add_r(self, value):
+        if not self.r:
+            self.r = BTNode(value, depth=self.depth + 1, parent=self)
             return self.depth + 1
-        elif self.is_perfect():
-            return self.l.add(value)
-        elif self.l.is_perfect():
-            return self.r.add(value)
-        else:
-            return self.l.add(value)
+        return self.r.add_r(value)
     def extend(self, values):
         for v in values:
             self.add(v)
     def get_height(self):
-        if self.l == None and self.r == None:
+        if not self.l and not self.r:
             return 0
         lh = rh = 0
-        if self.l != None:
+        if self.l:
             lh = 1 + self.l.get_height()
-        if self.r != None:
+        if self.r:
             rh = 1 + self.r.get_height()
         return max(lh, rh)
     def is_perfect(self):
         # Height of 0
-        if self.l == None and self.r == None:
+        if not self.l and not self.r:
             return True
         # Only one child
-        if self.l == None or self.r == None:
+        if not self.l or not self.r:
             return False
         # Both children have same height
         if self.l.get_height() == self.get_height() -1 \
                 and self.r.get_height() == self.get_height() -1:
             return self.l.is_perfect() and self.r.is_perfect()
+        # Default case
         return False
     def is_full(self):
-        if self.l == None and self.r == None:
+        if not self.l and not self.r:
             return True
-        if self.l != None and self.r != None:
+        if self.l and self.r:
             return is_f(self.l) and is_f(self.r)
         return False
     def is_complete(self):
-        if self.l == None and self.r == None:
+        if not self.l and not self.r:
             return True
-        if self.l == None and self.r != None:
+        if not self.l and self.r:
             return False
-        rc = self.r.is_complete() if self.r != None else True
+        rc = self.r.is_complete() if self.r else True
         return self.l.is_complete() and rc
     def __str__(self):
         return str(self.value)
     def to_dict(self):
         d = {"v": self.value}
-        if self.l != None:
+        if self.l:
             d["l"] = self.l.to_dict()
-        if self.r != None:
+        if self.r:
             d["r"] = self.r.to_dict()
         return d
+    def breadth_first(self):
+        queue = DCQueue()
+        yield self
+        if self.l:
+            queue.enqueue(self.l)
+        if self.r:
+            queue.enqueue(self.r)
+        while len(queue) > 0:
+            node = queue.dequeue()
+            yield node
+            if node.l:
+                queue.enqueue(node.l)
+            if node.r:
+                queue.enqueue(node.r)
     def flatten(self):
-        if self.l != None:
+        if self.l:
             for n in self.l.flatten():
                 yield n
         yield self
-        if self.r != None:
+        if self.r:
             for n in self.r.flatten():
                 yield n
     def preorder(self):
         yield self
-        if self.l != None:
+        if self.l:
             for n in self.l.preorder():
                 yield n
-        if self.r != None:
+        if self.r:
             for n in self.r.preorder():
                 yield n
     def postorder(self):
-        if self.l != None:
+        if self.l:
             for n in self.l.postorder():
                 yield n
-        if self.r != None:
+        if self.r:
             for n in self.r.postorder():
                 yield n
         yield self
-
-def get_levels(node):
-    output = [[] for _ in range(node.get_height() + 1)]
-    for n in node.flatten():
-        output[n.depth].append(n)
-    return output
-
-def display_crude(node):
-    for level in get_levels(node):
-        print(" ".join(str(node) for node in level))
+    def fill(self, value):
+        while not self.is_perfect():
+            self.add(value)
+    def get_levels(self):
+        output = [[] for _ in range(self.get_height() + 1)]
+        for n in self.flatten():
+            output[n.depth].append(n)
+        return output
+    def display_crude(self):
+        for level in self.get_levels():
+            print(" ".join(str(node) for node in level))
+    def copy(self):
+        # Returns a shallow copy of the node
+        def copy_children(original_node, copy_node):
+            if original_node.l:
+                copy_node.l = BTNode(
+                        original_node.l.value,
+                        depth=copy_node.depth + 1,
+                        parent=copy_node)
+                copy_children(original_node.l, copy_node.l)
+            if original_node.r:
+                copy_node.r = BTNode(
+                        original_node.r.value,
+                        depth=copy_node.depth + 1,
+                        parent=copy_node
+                        )
+                copy_children(original_node.r, copy_node.r)
+        c = BTNode(self.value)
+        copy_children(self, c)
+        return c
+    def display(self):
+        copy_with_gaps = self.copy()
+        copy_with_gaps.fill(None)
+        levels = copy_with_gaps.get_levels()
+        for level, nodes in enumerate(levels):
+            if level != 0:
+                print()
+            inner_padding = " "
+            row = len(levels) - (level + 1)
+            output = " " * math.ceil(((((2 ** row) - 1) * 3) + (2 ** row)) / 2)
+            if row != 0:
+                inner_padding = " " * ((((2 ** row) - 1) * 3) + (2 ** row))
+            output += inner_padding.join(f"{str(n):^3}" if n.value != None else " " for n in nodes)
+            print(output)
 
 if __name__ == "__main__":
-    #import doctest
-    #doctest.testmod()
-    tree = BTNode(0, 0, None)
-    for x in range(1, 8):
-        tree.add(x)
-        display_crude(tree)
-        print()
-
-
-
+    # import doctest
+    # doctest.testmod()
+    tree = BTNode(0)
+    tree.extend([x for x in range(1, 31)])
+    tree.display()
 
 
 
