@@ -1,4 +1,3 @@
-import math
 """
 This file contains my own versions of all the common data structures which \
 I am writing for my own personal study. I'm following the programiz tutorial \
@@ -350,22 +349,69 @@ class BTNode():
         copy_with_gaps.fill(None)
         levels = copy_with_gaps.get_levels()
         for level, nodes in enumerate(levels):
-            if level != 0:
-                print()
-            inner_padding = " "
+            pad = " "
             row = len(levels) - (level + 1)
-            output = " " * math.ceil(((((2 ** row) - 1) * 3) + (2 ** row)) / 2)
             if row != 0:
-                inner_padding = " " * ((((2 ** row) - 1) * 3) + (2 ** row))
-            output += inner_padding.join(f"{str(n):^3}" if n.value != None else " " for n in nodes)
+                pad = " " * ((((2 ** row) - 1) * 3) + (2 ** row))
+            half_pad = pad[:len(pad) // 2]
+            output = half_pad
+            formatted_values = (f"{str(n):^3}" if n.value != None else "   " 
+                    for n in nodes)
+            output += pad.join(formatted_values)
             print(output)
+            if row != 0:
+                # ┘ = "\u2518"
+                # └ = "\u2514"
+                # ┴ = "\u2534"
+                # ─ = "\u2500"
+                # ┌ = "\u250C"
+                # ┐ = "\u2510"
+                pad_next = " "
+                row -= 1
+                if row == -1: row = 0
+                if row != 0:
+                    pad_next = " " * ((((2 ** row) - 1) * 3) + (2 ** row))
+                half_pad_next_len = len(pad_next[:len(pad_next) // 2])
+                pipes = half_pad_next_len * " "
+                for node in nodes:
+                    if node.l.value:
+                        pipes += " " + '┌' + '─'
+                        pipes += half_pad_next_len * '─'
+                    else:
+                        pipes += "   "
+                        pipes += half_pad_next_len * " "
+                    if node.l.value and not node.r.value:
+                        pipes += '┘'
+                    if node.l.value and node.r.value:
+                        pipes += '┴'
+                    if not node.l.value and node.r.value:
+                        pipes += '└'
+                    if not node.l.value and not node.r.value:
+                        pipes += " "
+                    if node.r.value:
+                        pipes += half_pad_next_len * '─'
+                        pipes += '─' + '┐' + " "
+                    else:
+                        pipes += half_pad_next_len * " "
+                        pipes += "   "
+                    pipes += pad_next
+                print(pipes)
 
 if __name__ == "__main__":
     # import doctest
     # doctest.testmod()
     tree = BTNode(0)
     tree.extend([x for x in range(1, 31)])
+    tree.l.r = None
+    tree.r.l.r = None
+    tree.r.l.l.l = None
     tree.display()
+    print()
+    tree2 = BTNode("A")
+    tree2.extend("BC")
+    tree2.l.add_r("D")
+    tree2.r.add_l("E")
+    tree2.display()
 
 
 
