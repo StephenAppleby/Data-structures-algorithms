@@ -351,16 +351,20 @@ if __name__ == "__main__":
     # import doctest
     # doctest.testmod()
     tree = BTNode(0)
-    tree.extend([x for x in range(1, 31)])
-    tree.l.r = None
-    tree.r.l.r = None
-    tree.r.l.l.l = None
+    tree.extend([x for x in range(1, 63)])
     print(tree)
-    tree2 = BTNode("A")
-    tree2.extend("BC")
-    tree2.l.add_r("D")
-    tree2.r.add_l("E")
-    print(tree2)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
