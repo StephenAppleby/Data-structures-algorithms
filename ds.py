@@ -208,12 +208,95 @@ class DCQueue(CircularQueue):
             self.enqueue(d)
 
 class BTNode():
-    def __init__(self, value, depth=0, parent=None):
-        self.value = value
+    """
+    Recursive binary tree base class.
+
+    This base class implements a breadth first add method which adds the new
+    node at the first location in left -> right, top -> bottom order. This
+    leads to the simple creation of perfect trees. Classes which extend this
+    base class will define their own add methods. The extend method uses the
+    class specific add method to add multiple nodes at once.
+
+    Basic usage:
+    >>> tree = BTNode(data=[x for x in range(7)])
+    >>> print(tree)
+           0
+       ┌───┴───┐
+       1       2
+     ┌─┴─┐   ┌─┴─┐
+     3   4   5   6
+    >>> tree.r = None
+    >>> print(tree)
+           0
+       ┌───┘
+       1
+     ┌─┴─┐
+     3   4
+    >>> tree.add(2)
+    1
+    >>> print(tree)
+           0
+       ┌───┴───┐
+       1       2
+     ┌─┴─┐
+     3   4
+    >>> tree.extend([5, 6])
+    >>> print(tree)
+           0
+       ┌───┴───┐
+       1       2
+     ┌─┴─┐   ┌─┴─┐
+     3   4   5   6
+    """
+    def __init__(self, value=None, data=None, depth=0, parent=None):
         self.l = self.r = None
         self.depth = depth
         self.parent = parent
-    def add(self, value):
+        self.add = self.add_breadth_first
+        if value != None:
+            self.value = value
+            if data:
+                self.extend(data)
+        elif data:
+            self.value = data[0]
+            self.extend(data[1:])
+        else:
+            self.value = None
+    def add_breadth_first(self, value):
+        """
+        Default insertion method for binary trees.
+
+        Inserts a node into the first available place using breadth-first
+        search.
+
+        All insertion methods return the depth of the node inserted
+
+        >>> tree = BTNode(0)
+        >>> for x in range(1, 5):
+        ...     tree.add(x)
+        ...     print(tree)
+        1
+           0
+         ┌─┘
+         1
+        1
+           0
+         ┌─┴─┐
+         1   2
+        2
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┘
+         3
+        2
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐
+         3   4
+        
+        """
         for node in self.breadth_first():
             if not node.l:
                 node.l = BTNode(value, depth=node.depth + 1, parent=node)
@@ -222,19 +305,72 @@ class BTNode():
                 node.r = BTNode(value, depth=node.depth + 1, parent=node)
                 return node.depth + 1
     def add_l(self, value):
+        """
+        Manually insert a node to the left of self.
+
+        This convenience method is primarily for testing. You generally won't
+        be adding elements to a binary tree by hand.
+        """
         if not self.l:
             self.l = BTNode(value, depth=self.depth + 1, parent=self)
             return self.depth + 1
         return self.l.add_l(value)
     def add_r(self, value):
+        """
+        Manually insert a node to the right of self.
+
+        This convenience method is primarily for testing. You generally won't
+        be adding elements to a binary tree by hand.
+        """
         if not self.r:
             self.r = BTNode(value, depth=self.depth + 1, parent=self)
             return self.depth + 1
         return self.r.add_r(value)
     def extend(self, values):
+        """
+        Add each value in values to the tree in sequence.
+
+        This method utilises the .add method, meaning that as long as the
+        binary tree class which is inheriting this base class has properly
+        initialised it's own .add method, .extend will work in every case.
+
+        Example using the default breadth-first add method:
+        >>> tree = BTNode(0)
+        >>> tree.extend([x for x in range(1, 7)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        """
         for v in values:
             self.add(v)
     def get_height(self):
+        """
+        Returns maximum distance from self to a leaf (external) node.
+
+        Visits every child node recursively to find the maximum distance. This
+        approach calculates the height when needed instead of storing the
+        height of a node as an attribute. This is because the height of a node
+        can change dynamically when children are added or deleted. While this
+        could be handled and height values recalculated every time a node is
+        inserted or deleted, this approach seems simpler.
+
+        >>> tree = BTNode(data=[x for x in range(5)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐
+         3   4
+        >>> tree.get_height()
+        2
+        >>> tree.r.get_height()
+        0
+        >>> tree.l.get_height()
+        1
+        """
         if not self.l and not self.r:
             return 0
         lh = rh = 0
@@ -244,6 +380,32 @@ class BTNode():
             rh = 1 + self.r.get_height()
         return max(lh, rh)
     def is_perfect(self):
+        """
+        Returns true if self satisfies the definition of a perfect binary tree.
+
+        A perfect binary tree is any binary tree where each internal node has
+        exactly two children and each external node has the same depth.
+
+        >>> tree = BTNode(data=[x for x in range(6)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┘
+         3   4   5
+        >>> tree.is_perfect()
+        False
+        >>> tree.add(6)
+        2
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> tree.is_perfect()
+        True
+        """
         # Height of 0
         if not self.l and not self.r:
             return True
@@ -257,28 +419,142 @@ class BTNode():
         # Default case
         return False
     def is_full(self):
+        """
+        Returns true if self is a complete binary tree.
+
+        A complete binary is defined as any tree in which every node has either
+        two or no children.
+
+        >>> tree = BTNode(data=[0, 1, 2])
+        >>> print(tree)
+           0
+         ┌─┴─┐
+         1   2
+        >>> tree.is_full()
+        True
+        >>> tree.add(3)
+        2
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┘
+         3
+        >>> tree.is_full()
+        False
+        >>> tree.add(4)
+        2
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐
+         3   4
+        >>> tree.is_full()
+        True
+        """
+        # No children
         if not self.l and not self.r:
             return True
+        # 2 children
         if self.l and self.r:
-            return is_f(self.l) and is_f(self.r)
+            return self.l.is_full() and self.r.is_full()
+        # Default case: 1 child
         return False
     def is_complete(self):
-        if not self.l and not self.r:
-            return True
-        if not self.l and self.r:
-            return False
-        rc = self.r.is_complete() if self.r else True
-        return self.l.is_complete() and rc
+        """
+        Returns true if self is a complete binary tree.
+
+        A tree is defined as complete if each level of the tree is full except
+        possibly the last level, which must be filled from the left. A tree
+        which is constructed only with .add_breadth_first with no nodes
+        removed will always be complete.
+
+        >>> tree = BTNode(data=[x for x in range(6)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┘
+         3   4   5
+        >>> tree.is_complete()
+        True
+        >>> tree.r.add_r(6)
+        2
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> tree.is_complete()
+        True
+        >>> tree.r.l = None
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐     └─┐
+         3   4       6
+        >>> tree.is_complete()
+        False
+        >>> tree.r = None
+        >>> print(tree)
+               0
+           ┌───┘
+           1
+         ┌─┴─┐
+         3   4
+        >>> tree.is_complete()
+        False
+        """
+        # Nodes in a perfect tree when iterated over breadth-first will all
+        # have 2 children (internal) until the last or second last level. After
+        # finding a node with one (left) or zero children, every following node
+        # will have no children.
+
+        # Track state
+        state = "internal"
+        # Iterate over nodes breadth-first
+        for node in self.breadth_first():
+            # Only right child
+            if node.r and not node.l:
+                return False
+            if state == "internal":
+                # One or zero children -> change state
+                if not node.r:
+                    state = "external"
+                    continue
+            if state == "external":
+                # Any child
+                if node.r or node.l:
+                    return False
+        return True
     def __str__(self):
+        """
+        Renders to console in a readable format.
+
+        For more information, see util.display
+        """
         return util.display(self)
-    def to_dict(self):
-        d = {"v": self.value}
-        if self.l:
-            d["l"] = self.l.to_dict()
-        if self.r:
-            d["r"] = self.r.to_dict()
-        return d
     def breadth_first(self):
+        """
+        Returns a left -> right, top -> bottom iterator.
+
+        This iteration method, while slightly more complex than preorder,
+        inorder and postorder operations, is needed for binary search tree and
+        complete tree operations.
+
+        >>> tree = BTNode(data=[x for x in range(7)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> list(node.value for node in tree.breadth_first())
+        [0, 1, 2, 3, 4, 5, 6]
+        """
         queue = DCQueue()
         yield self
         if self.l:
@@ -293,6 +569,19 @@ class BTNode():
             if node.r:
                 queue.enqueue(node.r)
     def flatten(self):
+        """
+        Returns an inorder iterator for the children of self.
+
+        >>> tree = BTNode(data=[x for x in range(7)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> list(node.value for node in tree.flatten())
+        [3, 1, 4, 0, 5, 2, 6]
+        """
         if self.l:
             for n in self.l.flatten():
                 yield n
@@ -301,6 +590,19 @@ class BTNode():
             for n in self.r.flatten():
                 yield n
     def preorder(self):
+        """
+        Returns a preorder iterator for the children of self.
+
+        >>> tree = BTNode(data=[x for x in range(7)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> list(node.value for node in tree.preorder())
+        [0, 1, 3, 4, 2, 5, 6]
+        """
         yield self
         if self.l:
             for n in self.l.preorder():
@@ -309,6 +611,19 @@ class BTNode():
             for n in self.r.preorder():
                 yield n
     def postorder(self):
+        """
+        Returns a postorder iterator for the children of self.
+
+        >>> tree = BTNode(data=[x for x in range(7)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> list(node.value for node in tree.postorder())
+        [3, 4, 1, 5, 6, 2, 0]
+        """
         if self.l:
             for n in self.l.postorder():
                 yield n
@@ -317,18 +632,85 @@ class BTNode():
                 yield n
         yield self
     def fill(self, value):
+        """
+        Adds nodes to self until perfect.
+        
+        Assigns the value argument as the value for each node added this way.
+
+        >>> tree = BTNode(data=[x for x in range(7)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> tree.l = None
+        >>> print(tree)
+               0
+               └───┐
+                   2
+                 ┌─┴─┐
+                 5   6
+        
+        >>> tree.fill(7)
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           7       2
+         ┌─┴─┐   ┌─┴─┐
+         7   7   5   6
+        """
         while not self.is_perfect():
-            self.add(value)
+            self.add_breadth_first(value)
     def get_levels(self):
-        output = [[] for _ in range(self.get_height() + 1)]
-        for n in self.flatten():
-            output[n.depth].append(n)
+        """
+        Returns the children of the tree grouped in arrays by depth.
+
+        >>> tree = BTNode(data=[x for x in range(7)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> print([[n.value for n in level] for level in tree.get_levels()])
+        [[0], [1, 2], [3, 4, 5, 6]]
+
+        """
+        output = [[]]
+        level = 0
+        for node in self.breadth_first():
+            if node.depth > level:
+                output.append([])
+                level += 1
+            output[level].append(node)
         return output
-    def display_crude(self):
-        for level in self.get_levels():
-            print(" ".join(str(node) for node in level))
     def copy(self):
-        # Returns a shallow copy of the node
+        """
+        Returns a shallow copy of self.
+
+        >>> tree = BTNode(data=[0, 1, 2])
+        >>> print(tree)
+           0
+         ┌─┴─┐
+         1   2
+        >>> copy = tree.copy()
+        >>> print(copy)
+           0
+         ┌─┴─┐
+         1   2
+        >>> copy.extend([3, 4, 5, 6])
+        >>> print(copy)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> print(tree)
+           0
+         ┌─┴─┐
+         1   2
+        """
         def copy_children(original_node, copy_node):
             if original_node.l:
                 copy_node.l = BTNode(
@@ -348,11 +730,8 @@ class BTNode():
         return c
 
 if __name__ == "__main__":
-    # import doctest
-    # doctest.testmod()
-    tree = BTNode(0)
-    tree.extend([x for x in range(1, 63)])
-    print(tree)
+    import doctest
+    doctest.testmod()
 
 
 

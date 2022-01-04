@@ -43,6 +43,7 @@ def display(tree):
                 else " " * chars_width
                 for n in nodes)
         output += pad.join(formatted_values)
+        output = output.rstrip()
         # Add the pipes after each level except the last
         if inv_row != 0:
             # ┘ = "\u2518"
@@ -87,5 +88,6 @@ def display(tree):
                 # Add padding to each set of pipes except the last
                 if n != len(nodes) - 1:
                     output += pad
+            output = output.rstrip()
             output += '\n'
     return output
