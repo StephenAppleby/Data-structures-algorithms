@@ -65,21 +65,21 @@ def display(tree):
             output += half_pad
             # Assign the appropriate pipes if child present and spaces if not
             for n, node in enumerate(nodes):
-                if node.l.value:
+                if node.l.value != None:
                     output += " " + '┌' + '─'
                     output += len(half_pad) * '─'
                 else:
                     output += "   "
                     output += len(half_pad) * " "
-                if node.l.value and not node.r.value:
+                if node.l.value != None and not node.r.value != None:
                     output += '┘'
-                if node.l.value and node.r.value:
+                if node.l.value != None and node.r.value != None:
                     output += '┴'
-                if not node.l.value and node.r.value:
+                if not node.l.value != None and node.r.value != None:
                     output += '└'
-                if not node.l.value and not node.r.value:
+                if not node.l.value != None and not node.r.value != None:
                     output += " "
-                if node.r.value:
+                if node.r.value != None:
                     output += len(half_pad) * '─'
                     output += '─' + '┐' + " "
                 else:
