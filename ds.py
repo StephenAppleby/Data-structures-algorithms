@@ -217,6 +217,12 @@ class BTNode():
     base class will define their own add methods. The extend method uses the
     class specific add method to add multiple nodes at once.
 
+    The default deletion method assigns the node it is called on to None. This 
+    ensures that the parent of the child deleted has None as a child instead of 
+    removing it's child attribute, which would happen with del self. Classes 
+    that extend BTNode will implement their own deletion methods 
+    as appropriate.
+
     Basic usage:
     >>> tree = BTNode(data=[x for x in range(7)])
     >>> print(tree)
@@ -225,7 +231,7 @@ class BTNode():
        1       2
      ┌─┴─┐   ┌─┴─┐
      3   4   5   6
-    >>> tree.r = None
+    >>> tree.r.delete()
     >>> print(tree)
            0
        ┌───┘
@@ -248,11 +254,13 @@ class BTNode():
      ┌─┴─┐   ┌─┴─┐
      3   4   5   6
     """
-    def __init__(self, value=None, data=None, depth=0, parent=None):
+    def __init__(self, value=None, data=None, side=None, depth=0, parent=None):
         self.l = self.r = None
         self.depth = depth
         self.parent = parent
+        self.side = side
         self.add = self.add_breadth_first
+        self.delete = self.delete_default
         if value != None:
             self.value = value
             if data:
@@ -299,10 +307,18 @@ class BTNode():
         """
         for node in self.breadth_first():
             if not node.l:
-                node.l = BTNode(value, depth=node.depth + 1, parent=node)
+                node.l = BTNode(
+                        value, 
+                        depth=node.depth + 1, 
+                        side='l', 
+                        parent=node)
                 return node.depth + 1
             if not node.r:
-                node.r = BTNode(value, depth=node.depth + 1, parent=node)
+                node.r = BTNode(
+                        value, 
+                        depth=node.depth + 1, 
+                        side='r', 
+                        parent=node)
                 return node.depth + 1
     def add_l(self, value):
         """
@@ -312,7 +328,11 @@ class BTNode():
         be adding elements to a binary tree by hand.
         """
         if not self.l:
-            self.l = BTNode(value, depth=self.depth + 1, parent=self)
+            self.l = BTNode(
+                    value, 
+                    depth=self.depth + 1, 
+                    side='l',
+                    parent=self)
             return self.depth + 1
         return self.l.add_l(value)
     def add_r(self, value):
@@ -323,7 +343,11 @@ class BTNode():
         be adding elements to a binary tree by hand.
         """
         if not self.r:
-            self.r = BTNode(value, depth=self.depth + 1, parent=self)
+            self.r = BTNode(
+                    value, 
+                    depth=self.depth + 1, 
+                    side='r', 
+                    parent=self)
             return self.depth + 1
         return self.r.add_r(value)
     def extend(self, values):
@@ -346,6 +370,11 @@ class BTNode():
         """
         for v in values:
             self.add(v)
+    def delete_default(self):
+        if self.side == 'l':
+            self.parent.l = None
+        if self.side == 'r':
+            self.parent.r = None
     def get_height(self):
         """
         Returns maximum distance from self to a leaf (external) node.
@@ -489,7 +518,7 @@ class BTNode():
          3   4   5   6
         >>> tree.is_complete()
         True
-        >>> tree.r.l = None
+        >>> tree.r.l.delete()
         >>> print(tree)
                0
            ┌───┴───┐
@@ -498,7 +527,7 @@ class BTNode():
          3   4       6
         >>> tree.is_complete()
         False
-        >>> tree.r = None
+        >>> tree.r.delete()
         >>> print(tree)
                0
            ┌───┘
@@ -644,7 +673,7 @@ class BTNode():
            1       2
          ┌─┴─┐   ┌─┴─┐
          3   4   5   6
-        >>> tree.l = None
+        >>> tree.l.delete()
         >>> print(tree)
                0
                └───┐
@@ -716,12 +745,14 @@ class BTNode():
                 copy_node.l = BTNode(
                         original_node.l.value,
                         depth=copy_node.depth + 1,
+                        side='l',
                         parent=copy_node)
                 copy_children(original_node.l, copy_node.l)
             if original_node.r:
                 copy_node.r = BTNode(
                         original_node.r.value,
                         depth=copy_node.depth + 1,
+                        side='r',
                         parent=copy_node
                         )
                 copy_children(original_node.r, copy_node.r)
