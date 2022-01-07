@@ -280,6 +280,7 @@ class BTNode():
         """
         self.add = self.add_breadth_first
         self.delete = self.delete_default
+        self.extend = self.extend_default
     def add_breadth_first(self, value):
         """
         Default insertion method for binary trees.
@@ -360,7 +361,7 @@ class BTNode():
                     parent=self)
             return self.depth + 1
         return self.r.add_r(value)
-    def extend(self, values):
+    def extend_default(self, values):
         """
         Add each value in values to the tree in sequence.
 
@@ -822,8 +823,8 @@ class BSTNode(BTNode):
     def set_defaults(self):
         self.add = self.add_bst
         self.delete = self.delete_default
+        self.extend = self.balance
     def add_bst(self, value):
-        # value side depth parent
         if value == self.value:
             raise Exception("Duplicates not allowed in binary search tree")
         if value < self.value:
@@ -844,11 +845,38 @@ class BSTNode(BTNode):
                         depth=self.depth + 1,
                         parent=self)
                 return self.depth + 1
-    def balance(self):
+    def balance(self, data=[]):
         """
+        If self is not balanced, rearrange nodes such that it is balanced.
 
+        This implementation will lean towards the left.
+
+        >>> bst = BSTNode(data=[3, 1, 2, 0, 4, 5, 6, 7])
+        >>> print(bst)
+                                       3
+                       ┌───────────────┴───────────────┐
+                       1                               4
+               ┌───────┴───────┐                       └───────┐
+               0               2                               5
+                                                               └───┐
+                                                                   6
+                                                                   └─┐
+                                                                     7
+        >>> bst.is_balanced()
+        False
+        >>> bst.balance()
+        >>> print(bst)
+                       4
+               ┌───────┴───────┐
+               2               6
+           ┌───┴───┐       ┌───┴───┐
+           1       3       5       7
+         ┌─┘
+         0
+        >>> bst.is_balanced()
+        True
         """
-        nodes = [node.value for node in self.flatten()]
+        nodes = sorted(data + [node.value for node in self.flatten()])
         self.value = nodes.pop(len(nodes) // 2)
         self.l = None
         self.r = None
@@ -857,7 +885,6 @@ class BSTNode(BTNode):
                 return
             left_vals = values[0:(half_vals_len := ceil(vals_len / 2))]
             right_vals = values[half_vals_len:]
-            print(left_vals, right_vals)
             if len(left_vals) > 0:
                 node.l = BSTNode(
                         value=left_vals.pop(len(left_vals) // 2),
@@ -873,7 +900,6 @@ class BSTNode(BTNode):
                         parent=node)
                 build(node.r, right_vals)
         build(self, nodes)
-
     def delete_bst(self):
         pass
     def is_bst(self):
