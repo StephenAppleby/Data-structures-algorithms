@@ -5,6 +5,7 @@ at https://www.programiz.com/dsa
 """
 
 import util
+from math import ceil
 
 class Stack():
     """
@@ -259,8 +260,7 @@ class BTNode():
         self.depth = depth
         self.parent = parent
         self.side = side
-        self.add = self.add_breadth_first
-        self.delete = self.delete_default
+        self.set_defaults()
         if value != None:
             self.value = value
             if data:
@@ -270,6 +270,16 @@ class BTNode():
             self.extend(data[1:])
         else:
             self.value = None
+    def set_defaults(self):
+        """
+        Assign class specific insertion and deletion methods.
+
+        This method is called during __init__(). Classes which inherit this
+        base class can override this method to set the default insertion and
+        deletion behaviour to whatever is appropriate.
+        """
+        self.add = self.add_breadth_first
+        self.delete = self.delete_default
     def add_breadth_first(self, value):
         """
         Default insertion method for binary trees.
@@ -449,9 +459,9 @@ class BTNode():
         return False
     def is_full(self):
         """
-        Returns true if self is a complete binary tree.
+        Returns true if self is a full binary tree.
 
-        A complete binary is defined as any tree in which every node has either
+        A full binary is defined as any tree in which every node has either
         two or no children.
 
         >>> tree = BTNode(data=[0, 1, 2])
@@ -558,6 +568,50 @@ class BTNode():
                 # Any child
                 if node.r or node.l:
                     return False
+        return True
+    def is_balanced(self):
+        """
+        Returns True if self is a balanced binary tree.
+
+        A binary tree is defined as balanced if the difference in height of 
+        each child of each node is no more than 1. Height is defined as the
+        maximum distance to a leaf (external) node where leaf nodes have a
+        height of 0.
+
+        >>> tree = BTNode(data=[x for x in range(5)])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐
+         3   4
+
+        The left subtree of the root has a height of 1. The right subtree
+        is a leaf and so has a height of 0. Therefore it is considered 
+        balanced.
+
+        >>> tree.is_balanced()
+        True
+        >>> tree.r.delete()
+        >>> print(tree)
+               0
+           ┌───┘
+           1
+         ┌─┴─┐
+         3   4
+
+        This time, the right subtree of the root doesn't exist and so is
+        considered to have a height of -1. The difference between -1 and 1 is
+        greater than 1, therefore this tree is not balanced.
+
+        >>> tree.is_balanced()
+        False
+        """
+        for node in self.flatten():
+            rh = node.r.get_height() if node.r else -1
+            lh = node.l.get_height() if node.l else -1
+            if (diff := rh - lh) < -1 or diff > 1:
+                return False
         return True
     def __str__(self):
         """
@@ -760,9 +814,80 @@ class BTNode():
         copy_children(self, c)
         return c
 
+class BSTNode(BTNode):
+    """
+    I will write this later
+    Does not accept duplicates
+    """
+    def set_defaults(self):
+        self.add = self.add_bst
+        self.delete = self.delete_default
+    def add_bst(self, value):
+        # value side depth parent
+        if value == self.value:
+            raise Exception("Duplicates not allowed in binary search tree")
+        if value < self.value:
+            if self.l:
+                return self.l.add_bst(value)
+            else:
+                self.l = BSTNode(value=value,
+                        side='l',
+                        depth=self.depth + 1,
+                        parent=self)
+                return self.depth + 1
+        if value > self.value:
+            if self.r:
+                return self.r.add_bst(value)
+            else:
+                self.r = BSTNode(value=value,
+                        side='r',
+                        depth=self.depth + 1,
+                        parent=self)
+                return self.depth + 1
+    def balance(self):
+        """
+
+        """
+        nodes = [node.value for node in self.flatten()]
+        self.value = nodes.pop(len(nodes) // 2)
+        self.l = None
+        self.r = None
+        def build(node, values):
+            if (vals_len := len(values)) == 0:
+                return
+            left_vals = values[0:(half_vals_len := ceil(vals_len / 2))]
+            right_vals = values[half_vals_len:]
+            print(left_vals, right_vals)
+            if len(left_vals) > 0:
+                node.l = BSTNode(
+                        value=left_vals.pop(len(left_vals) // 2),
+                        side='l',
+                        depth=node.depth + 1,
+                        parent=node)
+                build(node.l, left_vals)
+            if len(right_vals) > 0:
+                node.r = BSTNode(
+                        value=right_vals.pop(len(right_vals) // 2),
+                        side='r',
+                        depth=node.depth + 1,
+                        parent=node)
+                build(node.r, right_vals)
+        build(self, nodes)
+
+    def delete_bst(self):
+        pass
+    def is_bst(self):
+        """
+        Returns True if self satisfies the definition of a binary search tree.
+
+        """
+        nodes = list(self.flatten())
+        return all(nodes[i] <= nodes[i+1] for i in range(len(nodes)-1))
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    
 
 
 
