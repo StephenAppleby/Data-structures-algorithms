@@ -245,149 +245,147 @@ class DCQueue(CircularQueue):
             self.enqueue(d)
 
 
-class BTNode:
+class BinaryTree:
     """
-    Recursive binary tree base class.
 
-    This base class implements a breadth first add method which adds the new
-    node at the first location in left -> right, top -> bottom order. This
-    leads to the simple creation of perfect trees. Classes which extend this
-    base class will define their own add methods. The extend method uses the
-    class specific add method to add multiple nodes at once.
-
-    The default deletion method assigns the node it is called on to None. This
-    ensures that the parent of the child deleted has None as a child instead of
-    removing it's child attribute, which would happen with del self. Classes
-    that extend BTNode will implement their own deletion methods
-    as appropriate.
-
-    Basic usage:
-    >>> tree = bt_example(0)
+    >>> tree = BinaryTree(data=[x for x in range(7)])
     >>> print(tree)
            0
        ┌───┴───┐
        1       2
      ┌─┴─┐   ┌─┴─┐
      3   4   5   6
-    >>> tree.r.delete()
-    >>> print(tree)
-           0
-       ┌───┘
-       1
-     ┌─┴─┐
-     3   4
-    >>> tree.add(2)
-    1
-    >>> print(tree)
-           0
-       ┌───┴───┐
-       1       2
-     ┌─┴─┐
-     3   4
-    >>> tree.extend([5, 6])
-    >>> print(tree)
-           0
-       ┌───┴───┐
-       1       2
-     ┌─┴─┐   ┌─┴─┐
-     3   4   5   6
+
     """
 
-    def __init__(self, key=None, data=None, side=None, depth=0, parent=None):
-        self.l = self.r = None
-        self.depth = depth
-        self.parent = parent
-        self.side = side
+    def __init__(self, root=None, data=[]):
+        self.root = root
         self.set_defaults()
-        if key != None:
-            self.key = key
-            if data:
-                self.extend(data)
-        elif data:
-            self.key = data[0]
-            self.extend(data[1:])
-        else:
-            self.key = None
+        self.extend(data)
 
     def set_defaults(self):
-        """
-        Assign class specific insertion and deletion methods.
-
-        This method is called during __init__(). Classes which inherit this
-        base class can override this method to set the default insertion and
-        deletion behaviour to whatever is appropriate.
-        """
         self.add = self.add_breadth_first
         self.extend = self.extend_default
-        self.get = self.get_default
         self.delete = self.delete_default
+        self.get = self.get_default
 
-    def add_breadth_first(self, key):
+    class BTNode:
         """
-        Default insertion method for binary trees.
+        Recursive binary tree base class.
 
-        Inserts a node into the first available place using breadth-first
-        search.
+        This base class implements a breadth first add method which adds the new
+        node at the first location in left -> right, top -> bottom order. This
+        leads to the simple creation of perfect trees. Classes which extend this
+        base class will define their own add methods. The extend method uses the
+        class specific add method to add multiple nodes at once.
 
-        All insertion methods return the depth of the node inserted
+        The default deletion method assigns the node it is called on to None. This
+        ensures that the parent of the child deleted has None as a child instead of
+        removing it's child attribute, which would happen with del self. Classes
+        that extend BTNode will implement their own deletion methods
+        as appropriate.
 
-        >>> tree = BTNode(0)
-        >>> for x in range(1, 5):
-        ...     tree.add(x)
-        ...     print(tree)
-        1
-           0
-         ┌─┘
-         1
-        1
-           0
-         ┌─┴─┐
-         1   2
-        2
+        Basic usage:
+        >>> tree = bt_example(0)
+        >>> print(tree)
                0
            ┌───┴───┐
            1       2
-         ┌─┘
-         3
-        2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
+        >>> tree.root.r.delete()
+        >>> print(tree)
+               0
+           ┌───┘
+           1
+         ┌─┴─┐
+         3   4
+        >>> tree.add(2)
+        1
+        >>> print(tree)
                0
            ┌───┴───┐
            1       2
          ┌─┴─┐
          3   4
-
+        >>> tree.extend([5, 6])
+        >>> print(tree)
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┴─┐   ┌─┴─┐
+         3   4   5   6
         """
-        for node in self.breadth_first():
-            if not node.l:
-                node.l = BTNode(key, depth=node.depth + 1, side="l", parent=node)
-                return node.depth + 1
-            if not node.r:
-                node.r = BTNode(key, depth=node.depth + 1, side="r", parent=node)
-                return node.depth + 1
 
-    def add_l(self, key):
-        """
-        Manually insert a node to the left of self.
+        def __init__(self, key=None, side=None, depth=0, parent=None, tree=None):
+            self.l = self.r = None
+            self.key = key
+            self.side = side
+            self.depth = depth
+            self.parent = parent
+            self.tree = tree
 
-        This convenience method is primarily for testing. You generally won't
-        be adding elements to a binary tree by hand.
-        """
-        if not self.l:
-            self.l = BTNode(key, depth=self.depth + 1, side="l", parent=self)
-            return self.depth + 1
-        return self.l.add_l(key)
+        def add_l(self, key):
+            """
+            Manually insert a node to the left of self.
 
-    def add_r(self, key):
-        """
-        Manually insert a node to the right of self.
+            This convenience method is primarily for testing. You generally won't
+            be adding elements to a binary tree by hand.
+            """
+            if not self.l:
+                self.l = BinaryTree.BTNode(
+                    key, depth=self.depth + 1, side="l", parent=self, tree=self.tree
+                )
+                return self.depth + 1
+            return self.l.add_l(key)
 
-        This convenience method is primarily for testing. You generally won't
-        be adding elements to a binary tree by hand.
-        """
-        if not self.r:
-            self.r = BTNode(key, depth=self.depth + 1, side="r", parent=self)
-            return self.depth + 1
-        return self.r.add_r(key)
+        def add_r(self, key):
+            """
+            Manually insert a node to the right of self.
+
+            This convenience method is primarily for testing. You generally won't
+            be adding elements to a binary tree by hand.
+            """
+            if not self.r:
+                self.r = BinaryTree.BTNode(
+                    key, depth=self.depth + 1, side="r", parent=self, tree=self.tree
+                )
+                return self.depth + 1
+            return self.r.add_r(key)
+
+        def get_height(self):
+            """
+            Returns maximum distance from self to a leaf (external) node.
+
+            Visits every child node recursively to find the maximum distance. This
+            approach calculates the height when needed instead of storing the
+            height of a node as an attribute. This is because the height of a node
+            can change dynamically when children are added or deleted. While this
+            could be handled and height keys recalculated every time a node is
+            inserted or deleted, this approach seems simpler.
+
+            >>> tree = bt_example(2)
+            >>> print(tree)
+                   0
+               ┌───┴───┐
+               1       2
+             ┌─┴─┐
+             3   4
+            >>> tree.get_height()
+            2
+            >>> tree.r.get_height()
+            0
+            >>> tree.l.get_height()
+            1
+            """
+            if not self.l and not self.r:
+                return 0
+            lh = rh = 0
+            if self.l:
+                lh = 1 + self.l.get_height()
+            if self.r:
+                rh = 1 + self.r.get_height()
+            return max(lh, rh)
 
     def extend_default(self, keys):
         """
@@ -398,7 +396,7 @@ class BTNode:
         initialised it's own .add method, .extend will work in every case.
 
         Example using the default breadth-first add method:
-        >>> tree = BTNode(0)
+        >>> tree = BinaryTree.BTNode(0)
         >>> tree.extend([x for x in range(1, 7)])
         >>> print(tree)
                0
@@ -437,48 +435,73 @@ class BTNode:
         Removes the node from memory by changing it's parent's reference to it
         to None. This ensures that the parent maintains it's l or r attribute
         which can be tested for truthyness.
-
-        If attempting to delete the root node, use del root instead of
-        root.delete().
         """
+        if self is self.tree.root:
+            self.tree.root = None
         if self.side == "l":
             self.parent.l = None
         if self.side == "r":
             self.parent.r = None
 
-    def get_height(self):
+    def add_breadth_first(self, key):
         """
-        Returns maximum distance from self to a leaf (external) node.
+        Default insertion method for binary trees.
 
-        Visits every child node recursively to find the maximum distance. This
-        approach calculates the height when needed instead of storing the
-        height of a node as an attribute. This is because the height of a node
-        can change dynamically when children are added or deleted. While this
-        could be handled and height keys recalculated every time a node is
-        inserted or deleted, this approach seems simpler.
+        Inserts a node into the first available place using breadth-first
+        search.
 
-        >>> tree = bt_example(2)
-        >>> print(tree)
+        All insertion methods return the depth of the node inserted
+
+        >>> tree = BinaryTree.BTNode()
+        >>> for x in range(0, 5):
+        ...     tree.add(x)
+        ...     print(tree)
+        0
+         0
+        1
+           0
+         ┌─┘
+         1
+        1
+           0
+         ┌─┴─┐
+         1   2
+        2
+               0
+           ┌───┴───┐
+           1       2
+         ┌─┘
+         3
+        2
                0
            ┌───┴───┐
            1       2
          ┌─┴─┐
          3   4
-        >>> tree.get_height()
-        2
-        >>> tree.r.get_height()
-        0
-        >>> tree.l.get_height()
-        1
+
         """
-        if not self.l and not self.r:
+        if not self.root:
+            self.root = BinaryTree.BTNode(key=key, tree=self)
             return 0
-        lh = rh = 0
-        if self.l:
-            lh = 1 + self.l.get_height()
-        if self.r:
-            rh = 1 + self.r.get_height()
-        return max(lh, rh)
+        for node in self.breadth_first():
+            if not node.l:
+                node.l = BinaryTree.BTNode(
+                    key=key,
+                    depth=node.depth + 1,
+                    side="l",
+                    parent=node,
+                    tree=self,
+                )
+                return node.depth + 1
+            if not node.r:
+                node.r = BinaryTree.BTNode(
+                    key=key,
+                    depth=node.depth + 1,
+                    side="r",
+                    parent=node,
+                    tree=self,
+                )
+                return node.depth + 1
 
     def is_perfect(self):
         """
@@ -507,20 +530,24 @@ class BTNode:
         >>> tree.is_perfect()
         True
         """
-        # Height of 0
-        if not self.l and not self.r:
-            return True
-        # Only one child
-        if not self.l or not self.r:
+
+        def node_is_perfect(node):
+            # Height of 0
+            if not node.l and not node.r:
+                return True
+            # Only one child
+            if not node.l or not node.r:
+                return False
+            # Both children have same height
+            if (
+                node.l.get_height() == node.get_height() - 1
+                and node.r.get_height() == node.get_height() - 1
+            ):
+                return node_is_perfect(node.l) and node_is_perfect(node.r)
+            # Default case
             return False
-        # Both children have same height
-        if (
-            self.l.get_height() == self.get_height() - 1
-            and self.r.get_height() == self.get_height() - 1
-        ):
-            return self.l.is_perfect() and self.r.is_perfect()
-        # Default case
-        return False
+
+        return node_is_perfect(self.root)
 
     def is_full(self):
         """
@@ -681,13 +708,11 @@ class BTNode:
                 return False
         return True
 
-    def __str__(self):
-        """
-        Renders to console in a readable format.
-
-        For more information, see util.display
-        """
+    def display(self):
         return util.display(self)
+
+    def display_depths(self):
+        return util.display(self, item="depths")
 
     def breadth_first(self):
         """
@@ -708,11 +733,13 @@ class BTNode:
         [0, 1, 2, 3, 4, 5, 6]
         """
         queue = DCQueue()
-        yield self
-        if self.l:
-            queue.enqueue(self.l)
-        if self.r:
-            queue.enqueue(self.r)
+        if not self.root:
+            return
+        yield self.root
+        if self.root.l:
+            queue.enqueue(self.root.l)
+        if self.root.r:
+            queue.enqueue(self.root.r)
         while len(queue) > 0:
             node = queue.dequeue()
             yield node
@@ -872,7 +899,7 @@ class BTNode:
 
         def copy_children(original_node, copy_node):
             if original_node.l:
-                copy_node.l = BTNode(
+                copy_node.l = BinaryTree.BTNode(
                     original_node.l.key,
                     depth=copy_node.depth + 1,
                     side="l",
@@ -880,7 +907,7 @@ class BTNode:
                 )
                 copy_children(original_node.l, copy_node.l)
             if original_node.r:
-                copy_node.r = BTNode(
+                copy_node.r = BinaryTree.BTNode(
                     original_node.r.key,
                     depth=copy_node.depth + 1,
                     side="r",
@@ -888,12 +915,12 @@ class BTNode:
                 )
                 copy_children(original_node.r, copy_node.r)
 
-        c = BTNode(self.key)
-        copy_children(self, c)
-        return c
+        copy_root = BinaryTree.BTNode(self.root.key)
+        copy_children(self.root, copy_root)
+        return BinaryTree(root=copy_root)
 
 
-class BSTNode(BTNode):
+class BSTNode(BinaryTree.BTNode):
     """
     I will write this later
     Does not accept duplicates
@@ -1080,8 +1107,8 @@ class BSTNode(BTNode):
             successor = self.r
             while successor.l:
                 successor = successor.l
-            successor.delete_default()
             self.key = successor.key
+            successor.delete_default()
 
     def is_bst(self):
         """
@@ -1091,13 +1118,52 @@ class BSTNode(BTNode):
         return all(nodes[i] <= nodes[i + 1] for i in range(len(nodes) - 1))
 
 
+class AVLNode(BSTNode):
+    """
+    Write later
+    """
+
+    def __init__(self, **kwargs):
+        self.bal = kwargs.pop("bal") if "bal" in kwargs else None
+        super().__init__(**kwargs)
+
+    def set_defaults(self):
+        self.add = self.add_avl
+        self.extend = self.extend_avl
+        self.get = self.get_bst
+        self.delete = self.delete_avl
+
+    def add_avl(self, key):
+        for node in self.breadth_first():
+            if not node.l:
+                node.l = AVLNode(
+                    key=key, depth=node.depth + 1, side="l", parent=node, bal=0
+                )
+                return node.depth + 1
+            if not node.r:
+                node.r = AVLNode(
+                    key=key, depth=node.depth + 1, side="r", parent=node, bal=0
+                )
+                return node.depth + 1
+
+    def extend_avl(self, data=[]):
+        for node in data:
+            self.add_avl(node)
+
+    def delete_avl(self):
+        pass
+
+    def l_rotate(self):
+        pass
+
+
 def bt_example(i):
     examples = []
-    examples.append(BTNode(data=[x for x in range(7)]))
-    examples.append(BTNode(data=[x for x in range(15)]))
-    examples.append(BTNode(data=[x for x in range(5)]))
-    examples.append(BTNode(data=[x for x in range(6)]))
-    examples.append(BTNode(data=[0, 1, 2]))
+    examples.append(BinaryTree(data=[x for x in range(7)]))
+    examples.append(BinaryTree(data=[x for x in range(15)]))
+    examples.append(BinaryTree(data=[x for x in range(5)]))
+    examples.append(BinaryTree(data=[x for x in range(6)]))
+    examples.append(BinaryTree(data=[0, 1, 2]))
     return examples[i]
 
 
@@ -1122,6 +1188,8 @@ def bst_example(i):
 
 
 if __name__ == "__main__":
-    import doctest
+    # import doctest
 
-    doctest.testmod()
+    # doctest.testmod()
+    tree = bt_example(0)
+    tree.display()

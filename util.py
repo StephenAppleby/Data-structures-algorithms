@@ -1,4 +1,15 @@
-def display(tree):
+def format_nodes(nodes, chars_width, item="key"):
+    if item == "key":
+        return (
+            f"{str(n.key):^3}" if n.key != None else " " * chars_width for n in nodes
+        )
+    if item == "depths":
+        return (f"{str(n.depth):^3}" for n in nodes)
+    if item == "heights":
+        return (f"{str(n.height):^3}" for n in nodes)
+
+
+def display(tree, item="key"):
     """
     Renders a binary tree to the console in a human readable format.
 
@@ -36,10 +47,8 @@ def display(tree):
         output += half_pad
         # Ensure that we have the string key of each node to three chars
         # or the same amount of spaces
-        formatted_keys = (
-            f"{str(n.key):^3}" if n.key != None else " " * chars_width for n in nodes
-        )
-        output += pad.join(formatted_keys)
+        formatted_nodes = format_nodes(nodes, chars_width, item)
+        output += pad.join(formatted_nodes)
         output = output.rstrip()
         # Add the pipes after each level except the last
         if inv_row != 0:
