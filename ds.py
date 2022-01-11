@@ -709,10 +709,10 @@ class BinaryTree:
         return True
 
     def display(self):
-        return util.display(self)
+        print(util.display(self))
 
     def display_depths(self):
-        return util.display(self, item="depths")
+        print(util.display(self, item="depths"))
 
     def breadth_first(self):
         """
