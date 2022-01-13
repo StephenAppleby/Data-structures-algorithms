@@ -260,14 +260,11 @@ class BinaryTree:
 
     def __init__(self, root=None, data=[]):
         self.root = root
-        self.set_defaults()
-        self.extend(data)
-
-    def set_defaults(self):
         self.add = self.add_breadth_first
         self.extend = self.extend_default
         self.delete = self.delete_default
         self.get = self.get_default
+        self.extend(data)
 
     class BTNode:
         """
@@ -428,7 +425,7 @@ class BinaryTree:
             if node.key == key:
                 return node
 
-    def delete_default(self):
+    def delete_default(self, key):
         """
         Remove a node from the tree.
 
@@ -436,12 +433,14 @@ class BinaryTree:
         to None. This ensures that the parent maintains it's l or r attribute
         which can be tested for truthyness.
         """
-        if self is self.tree.root:
-            self.tree.root = None
-        if self.side == "l":
-            self.parent.l = None
-        if self.side == "r":
-            self.parent.r = None
+        node = self.get(key)
+
+        if node is self.root:
+            self.root = None
+        if node.side == "l":
+            node.parent.l = None
+        if node.side == "r":
+            node.parent.r = None
 
     def add_breadth_first(self, key):
         """
@@ -547,6 +546,8 @@ class BinaryTree:
             # Default case
             return False
 
+        if not self.root:
+            return
         return node_is_perfect(self.root)
 
     def is_full(self):
@@ -584,14 +585,20 @@ class BinaryTree:
         >>> tree.is_full()
         True
         """
-        # No children
-        if not self.l and not self.r:
-            return True
-        # 2 children
-        if self.l and self.r:
-            return self.l.is_full() and self.r.is_full()
-        # Default case: 1 child
-        return False
+
+        def rec_is_full(node):
+            # No children
+            if not node.l and not node.r:
+                return True
+            # 2 children
+            if node.l and node.r:
+                return rec_is_full(node.l) and rec_is_full(node.r)
+            # Default case: 1 child
+            return False
+
+        if not self.root:
+            return
+        return rec_is_full(self.root)
 
     def is_complete(self):
         """
@@ -640,6 +647,8 @@ class BinaryTree:
         >>> tree.is_complete()
         False
         """
+        if not self.root:
+            return
         # Nodes in a perfect tree when iterated over breadth-first will all
         # have 2 children (internal) until the last or second last level. After
         # finding a node with one (left) or zero children, every following node
@@ -701,6 +710,8 @@ class BinaryTree:
         >>> tree.is_balanced()
         False
         """
+        if not self.root:
+            return
         for node in self.flatten():
             rh = node.r.get_height() if node.r else -1
             lh = node.l.get_height() if node.l else -1
@@ -732,10 +743,10 @@ class BinaryTree:
         >>> list(node.key for node in tree.breadth_first())
         [0, 1, 2, 3, 4, 5, 6]
         """
-        queue = DCQueue()
         if not self.root:
-            return
+            raise StopIteration
         yield self.root
+        queue = DCQueue()
         if self.root.l:
             queue.enqueue(self.root.l)
         if self.root.r:
@@ -762,13 +773,19 @@ class BinaryTree:
         >>> list(node.key for node in tree.flatten())
         [3, 1, 4, 0, 5, 2, 6]
         """
-        if self.l:
-            for n in self.l.flatten():
-                yield n
-        yield self
-        if self.r:
-            for n in self.r.flatten():
-                yield n
+        if not self.root:
+            raise StopIteration
+
+        def rec_flatten(node):
+            if node.l:
+                for n in rec_flatten(node.l):
+                    yield n
+            yield node
+            if node.r:
+                for n in rec_flatten(node.r):
+                    yield n
+
+        return rec_flatten(self.root)
 
     def preorder(self):
         """
@@ -784,13 +801,19 @@ class BinaryTree:
         >>> list(node.key for node in tree.preorder())
         [0, 1, 3, 4, 2, 5, 6]
         """
-        yield self
-        if self.l:
-            for n in self.l.preorder():
-                yield n
-        if self.r:
-            for n in self.r.preorder():
-                yield n
+
+        def rec_preorder(node):
+            yield node
+            if node.l:
+                for n in rec_preorder(node.l):
+                    yield n
+            if node.r:
+                for n in rec_preorder(node.r):
+                    yield n
+
+        if not self.root:
+            raise StopIteration
+        return rec_preorder(self.root)
 
     def postorder(self):
         """
@@ -806,6 +829,8 @@ class BinaryTree:
         >>> list(node.key for node in tree.postorder())
         [3, 4, 1, 5, 6, 2, 0]
         """
+        if not self.root:
+            raise StopIteration
         if self.l:
             for n in self.l.postorder():
                 yield n
