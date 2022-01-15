@@ -322,6 +322,39 @@ class BinaryTree:
             self.parent = parent
             self.tree = tree
 
+        def detach(self):
+            if self is self.tree.root:
+                self.tree.root = None
+            elif self.side == "l":
+                self.parent.l = None
+            elif self.side == "r":
+                self.parent.r = None
+
+        def move(self, destination, keep_children=False):
+            """
+            Replace destination with self
+            """
+            self.detach()
+            if destination.parent:
+                self.parent = destination.parent
+                self.depth = destination.parent.depth + 1
+                if destination.side == "l":
+                    destination.parent.l = self
+                    self.side = "l"
+                elif destination.side == "r":
+                    destination.parent.r = self
+                    self.side = "r"
+            else:
+                self.tree.root = self
+                self.parent = None
+            if not keep_children:
+                self.l = None
+                self.r = None
+                if destination.l and self is not destination.l:
+                    self.l = destination.l
+                if destination.r and self is not destination.r:
+                    self.r = destination.r
+
         def add_l(self, key):
             """
             Manually insert a node to the left of self.
@@ -434,13 +467,7 @@ class BinaryTree:
         which can be tested for truthyness.
         """
         node = self.get(key)
-
-        if node is self.root:
-            self.root = None
-        if node.side == "l":
-            node.parent.l = None
-        if node.side == "r":
-            node.parent.r = None
+        node.detach()
 
     def add_breadth_first(self, key):
         """
@@ -774,7 +801,7 @@ class BinaryTree:
         [3, 1, 4, 0, 5, 2, 6]
         """
         if not self.root:
-            raise StopIteration
+            return
 
         def rec_flatten(node):
             if node.l:
@@ -925,53 +952,67 @@ class BinaryTree:
         def copy_children(original_node, copy_node):
             if original_node.l:
                 copy_node.l = BinaryTree.BTNode(
-                    original_node.l.key,
+                    key=original_node.l.key,
                     depth=copy_node.depth + 1,
                     side="l",
                     parent=copy_node,
+                    tree=original_node.tree,
                 )
                 copy_children(original_node.l, copy_node.l)
             if original_node.r:
                 copy_node.r = BinaryTree.BTNode(
-                    original_node.r.key,
+                    key=original_node.r.key,
                     depth=copy_node.depth + 1,
                     side="r",
                     parent=copy_node,
+                    tree=original_node.tree,
                 )
                 copy_children(original_node.r, copy_node.r)
 
-        copy_root = BinaryTree.BTNode(self.root.key)
+        if not self.root:
+            return BinaryTree()
+        copy_root = BinaryTree.BTNode(key=self.root.key)
         copy_children(self.root, copy_root)
         return BinaryTree(root=copy_root)
 
 
-class BSTNode(BinaryTree.BTNode):
-    """
-    I will write this later
-    Does not accept duplicates
-    """
-
-    def set_defaults(self):
+class BinarySearchTree(BinaryTree):
+    def __init__(self, **kwargs):
+        data = []
+        if "data" in kwargs:
+            data = kwargs.pop("data")
+        super().__init__(**kwargs)
         self.add = self.add_bst
         self.extend = self.balance
-        self.get = self.get_bst
         self.delete = self.delete_bst
+        self.get = self.get_bst
+        self.extend(data=data)
 
     def add_bst(self, key):
-        if key == self.key:
-            raise Exception("Duplicates not allowed in binary search tree")
-        if key < self.key:
-            if self.l:
-                return self.l.add_bst(key)
-            else:
-                self.l = BSTNode(key=key, side="l", depth=self.depth + 1, parent=self)
-                return self.depth + 1
-        if key > self.key:
-            if self.r:
-                return self.r.add_bst(key)
-            else:
-                self.r = BSTNode(key=key, side="r", depth=self.depth + 1, parent=self)
-                return self.depth + 1
+        def rec_add(node, key):
+            if key == node.key:
+                raise Exception("Duplicates not allowed in binary search tree")
+            if key < node.key:
+                if node.l:
+                    return rec_add(node.l, key)
+                else:
+                    node.l = self.BTNode(
+                        key=key, side="l", depth=node.depth + 1, parent=node
+                    )
+                    return node.depth + 1
+            if key > node.key:
+                if node.r:
+                    return rec_add(node.r, key)
+                else:
+                    node.r = self.BTNode(
+                        key=key, side="r", depth=node.depth + 1, parent=node
+                    )
+                    return node.depth + 1
+
+        if not self.root:
+            self.root = self.BTNode(key=key, depth=0)
+            return 0
+        return rec_add(self.root, key)
 
     def balance(self, data=[]):
         """
@@ -1006,10 +1047,11 @@ class BSTNode(BinaryTree.BTNode):
         >>> bst.is_balanced()
         True
         """
-        nodes = sorted(data + [node.key for node in self.flatten()])
-        self.key = nodes.pop(len(nodes) // 2)
-        self.l = None
-        self.r = None
+        old_nodes = [] if not (ar := self.flatten()) else ar
+        nodes = sorted(data + [node.key for node in old_nodes])
+        if len(nodes) == 0:
+            return
+        self.root = self.BTNode(key=nodes.pop(len(nodes) // 2), depth=0)
 
         def build(node, keys):
             if (vals_len := len(keys)) == 0:
@@ -1017,7 +1059,7 @@ class BSTNode(BinaryTree.BTNode):
             left_vals = keys[0 : (half_vals_len := ceil(vals_len / 2))]
             right_vals = keys[half_vals_len:]
             if len(left_vals) > 0:
-                node.l = BSTNode(
+                node.l = self.BTNode(
                     key=left_vals.pop(len(left_vals) // 2),
                     side="l",
                     depth=node.depth + 1,
@@ -1025,7 +1067,7 @@ class BSTNode(BinaryTree.BTNode):
                 )
                 build(node.l, left_vals)
             if len(right_vals) > 0:
-                node.r = BSTNode(
+                node.r = self.BTNode(
                     key=right_vals.pop(len(right_vals) // 2),
                     side="r",
                     depth=node.depth + 1,
@@ -1033,7 +1075,7 @@ class BSTNode(BinaryTree.BTNode):
                 )
                 build(node.r, right_vals)
 
-        build(self, nodes)
+        build(self.root, nodes)
 
     def get_bst(self, key):
         """
@@ -1082,14 +1124,20 @@ class BSTNode(BinaryTree.BTNode):
         multiple elements at once, however in a slower fashion than a proper
         self-balancing tree.
         """
-        if key == self.key:
-            return self
-        if key < self.key:
-            return self.l.get_bst(key)
-        if key > self.key:
-            return self.r.get_bst(key)
+        if not self.root:
+            return
 
-    def delete_bst(self):
+        def rec_get(node, key):
+            if key == node.key:
+                return node
+            if key < node.key and node.l:
+                return rec_get(node.l, key)
+            if key > node.key and node.r:
+                return rec_get(node.r, key)
+
+        return rec_get(self.root, key)
+
+    def delete_bst(self, key):
         """
         Remove node from tree.
 
@@ -1119,21 +1167,24 @@ class BSTNode(BinaryTree.BTNode):
          0   2   4   6   8  10  12  14
 
         """
+        to_delete = self.get(key)
         # Case 1: Leaf node
-        if not self.l and not self.r:
-            self.delete_default()
+        if not to_delete.l and not to_delete.r:
+            to_delete.remove()
         # Case 2: One child
-        elif bool(self.l) != bool(self.r):
-            child = self.l if self.l else self.r
-            self.key = child.key
-            child.delete_default()
+        elif bool(to_delete.l) != bool(to_delete.r):
+            child = to_delete.l if to_delete.l else to_delete.r
+            # Replace child with self
+            child.move(to_delete, keep_children=True)
         # Case 3: Two children
         else:
-            successor = self.r
+            successor = to_delete.r
             while successor.l:
                 successor = successor.l
-            self.key = successor.key
-            successor.delete_default()
+            # Rescue successors right child
+            if successor.r:
+                successor.r.move(successor, keep_children=True)
+            successor.move(to_delete)
 
     def is_bst(self):
         """
@@ -1141,45 +1192,6 @@ class BSTNode(BinaryTree.BTNode):
         """
         nodes = list(self.flatten())
         return all(nodes[i] <= nodes[i + 1] for i in range(len(nodes) - 1))
-
-
-class AVLNode(BSTNode):
-    """
-    Write later
-    """
-
-    def __init__(self, **kwargs):
-        self.bal = kwargs.pop("bal") if "bal" in kwargs else None
-        super().__init__(**kwargs)
-
-    def set_defaults(self):
-        self.add = self.add_avl
-        self.extend = self.extend_avl
-        self.get = self.get_bst
-        self.delete = self.delete_avl
-
-    def add_avl(self, key):
-        for node in self.breadth_first():
-            if not node.l:
-                node.l = AVLNode(
-                    key=key, depth=node.depth + 1, side="l", parent=node, bal=0
-                )
-                return node.depth + 1
-            if not node.r:
-                node.r = AVLNode(
-                    key=key, depth=node.depth + 1, side="r", parent=node, bal=0
-                )
-                return node.depth + 1
-
-    def extend_avl(self, data=[]):
-        for node in data:
-            self.add_avl(node)
-
-    def delete_avl(self):
-        pass
-
-    def l_rotate(self):
-        pass
 
 
 def bt_example(i):

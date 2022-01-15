@@ -4,6 +4,9 @@ from util import display
 from test_util import expect, example
 
 
+assertions = 0
+
+
 def expected(got, expect, raw=False):
     return "Expected:\n{}\nGot:\n{}".format(
         expect if not raw else repr(expect), got if not raw else repr(got)
@@ -11,6 +14,8 @@ def expected(got, expect, raw=False):
 
 
 def test(got, exp, raw=False):
+    global assertions
+    assertions += 1
     assert got == exp, expected(got, exp, raw)
 
 
@@ -18,7 +23,12 @@ def get_bt(count):
     return ds.BinaryTree(data=[x for x in range(count)])
 
 
+def get_bst(count):
+    return ds.BinarySearchTree(data=[x for x in range(count)])
+
+
 def bt_init():
+    test(isinstance(ds.BinaryTree(), ds.BinaryTree), True)
     got = display(get_bt(3))
     exp = expect["bt"]["3"]
     test(got, exp)
@@ -129,6 +139,78 @@ def bt_copy():
     test(display(copy), expect["bt"]["7"])
 
 
+def btn_init():
+    node = ds.BinaryTree.BTNode()
+    test(isinstance(node, ds.BinaryTree.BTNode), True)
+    tree = get_bt(3)
+    node = tree.get(2)
+    test(node.key, 2)
+    test(node.side, "r")
+    test(node.depth, 1)
+    test(node.parent is tree.root, True)
+    test(node.tree is tree, True)
+
+
+def btn_remove():
+    tree = get_bt(5)
+    tree.get(1).detach()
+    test(display(tree), expect["bt"]["2d"])
+    test(tree.root.l, None)
+
+
+def btn_move():
+    tree = get_bt(7)
+    tree.get(3).move(tree.get(2))
+    test(display(tree), expect["bt"]["6ma"])
+    test(tree.get(3).side, "r")
+    test(tree.get(3).depth, 1)
+    test(tree.get(3).parent is tree.root, True)
+    test(tree.get(3).tree is tree, True)
+    tree = get_bt(7)
+    tree.get(5).move(tree.root)
+    test(display(tree), expect["bt"]["6mb"])
+    tree.get(2).move(tree.root)
+    test(display(tree), expect["bt"]["4m"])
+
+
+def btn_get_height():
+    tree = get_bt(10)
+    test(tree.get(0).get_height(), 3)
+    test(tree.get(9).get_height(), 0)
+    test(tree.get(1).get_height(), 2)
+
+
+def bst_init():
+    test(isinstance(ds.BinarySearchTree(), ds.BinarySearchTree), True)
+    test(display(get_bst(1)), " 0")
+
+
+def bst_balance_add():
+    bst = get_bst(0)
+    for x in range(7):
+        bst.add(x)
+        bst.balance()
+        test(display(bst), expect["bst"][str(x + 1)])
+
+
+def bst_delete():
+    bst = get_bst(7)
+
+
+#    bst.delete(3)
+#    test(display(bst), expect["bst"]["6d"])
+#    bst.delete(0)
+#    test(display(bst), expect["bst"]["5d"])
+
+
+def bst_get():
+    bst = get_bst(7)
+    test(bst.get(7), None)
+    test(bst.get(3).key, 3)
+    test(bst.get(6).key, 6)
+    test(bst.get(0).key, 0)
+
+
 def suites():
     return {
         "BinaryTree": [
@@ -145,7 +227,18 @@ def suites():
             ("Get levels", bt_get_levels),
             ("Copy", bt_copy),
         ],
-        "BinarySearchTree": [],
+        "BTNode": [
+            ("Init", btn_init),
+            ("Remove", btn_remove),
+            ("Move", btn_move),
+            ("Get height", btn_get_height),
+        ],
+        "BinarySearchTree": [
+            ("Init", bst_init),
+            ("Balance and Add", bst_balance_add),
+            ("Delete", bst_delete),
+            ("Get", bst_get),
+        ],
         "AVLTree": [],
     }
 
@@ -170,4 +263,5 @@ if __name__ == "__main__":
                 traceback.print_exc()
         print(f"{suite:25}{passed:3} / {total:<3}")
     if all_pass:
+        print(f"{assertions} assertions")
         print("All tests passed. Congrats =D")
