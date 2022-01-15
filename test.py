@@ -151,7 +151,7 @@ def btn_init():
     test(node.tree is tree, True)
 
 
-def btn_remove():
+def btn_detach():
     tree = get_bt(5)
     tree.get(1).detach()
     test(display(tree), expect["bt"]["2d"])
@@ -183,6 +183,8 @@ def btn_get_height():
 def bst_init():
     test(isinstance(ds.BinarySearchTree(), ds.BinarySearchTree), True)
     test(display(get_bst(1)), " 0")
+    bst = get_bst(7)
+    test(bst.get(4).tree is bst, True)
 
 
 def bst_balance_add():
@@ -195,12 +197,10 @@ def bst_balance_add():
 
 def bst_delete():
     bst = get_bst(7)
-
-
-#    bst.delete(3)
-#    test(display(bst), expect["bst"]["6d"])
-#    bst.delete(0)
-#    test(display(bst), expect["bst"]["5d"])
+    bst.delete(3)
+    test(display(bst), expect["bst"]["6d"])
+    bst.delete(0)
+    test(display(bst), expect["bst"]["5d"])
 
 
 def bst_get():
@@ -229,7 +229,7 @@ def suites():
         ],
         "BTNode": [
             ("Init", btn_init),
-            ("Remove", btn_remove),
+            ("Detach", btn_detach),
             ("Move", btn_move),
             ("Get height", btn_get_height),
         ],
