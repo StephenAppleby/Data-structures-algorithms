@@ -336,7 +336,7 @@ class BinaryTree:
             """
             # Detach
             self.detach()
-            # It not going to root attach to parent
+            # If not going to root attach to parent
             if destination.parent:
                 self.parent = destination.parent
                 self.depth = destination.parent.depth + 1
@@ -356,8 +356,10 @@ class BinaryTree:
                 self.r = None
                 if destination.l and self is not destination.l:
                     self.l = destination.l
+                    destination.l.parent = self
                 if destination.r and self is not destination.r:
                     self.r = destination.r
+                    destination.r.parent = self
 
         def add_l(self, key):
             """
@@ -452,9 +454,13 @@ class BinaryTree:
          ┌─┴─┐
          3   4
         """
+        found = None
         for node in self.preorder():
             if node.key == key:
-                return node
+                found = node
+        if found is None:
+            raise KeyError(f"{key} not in tree")
+        return found
 
     def delete_default(self, key):
         """
@@ -1084,8 +1090,6 @@ class BinarySearchTree(BinaryTree):
         multiple elements at once, however in a slower fashion than a proper
         self-balancing tree.
         """
-        if not self.root:
-            return
 
         def rec_get(node, key):
             if key == node.key:
@@ -1095,7 +1099,12 @@ class BinarySearchTree(BinaryTree):
             if key > node.key and node.r:
                 return rec_get(node.r, key)
 
-        return rec_get(self.root, key)
+        found = None
+        if self.root:
+            found = rec_get(self.root, key)
+        if found is None:
+            raise KeyError(f"{key} not in tree")
+        return found
 
     def delete_bst(self, key):
         """

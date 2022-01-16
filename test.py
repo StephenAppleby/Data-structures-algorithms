@@ -56,7 +56,10 @@ def bt_get():
     tree = get_bt(7)
     test(isinstance(tree.get(2), ds.BinaryTree.BTNode), True)
     test(tree.get(1).key, 1)
-    test(tree.get(9), None)
+    try:
+        tree.get(9)
+    except KeyError as e:
+        test(str(e), "'9 not in tree'")
     test(tree.get(0).key, 0)
 
 
@@ -172,6 +175,12 @@ def btn_move():
     tree.get(2).move(tree.root)
     test(display(tree), expect["bt"]["4m"])
 
+    tree = get_bt(1)
+    tree.root.add_l(1)
+    tree.root.l.add_r(2)
+    tree.get(2).move(tree.get(1), keep_children=True)
+    test(display(tree), expect["bt"]["2m"])
+
 
 def btn_get_height():
     tree = get_bt(10)
@@ -201,11 +210,18 @@ def bst_delete():
     test(display(bst), expect["bst"]["6d"])
     bst.delete(0)
     test(display(bst), expect["bst"]["5d"])
+    bst.delete(1)
+    test(display(bst), expect["bst"]["4d"])
+    bst.delete(2)
+    test(display(bst), expect["bst"]["3d"])
 
 
 def bst_get():
     bst = get_bst(7)
-    test(bst.get(7), None)
+    try:
+        bst.get(7)
+    except KeyError as e:
+        test(str(e), "'7 not in tree'")
     test(bst.get(3).key, 3)
     test(bst.get(6).key, 6)
     test(bst.get(0).key, 0)
