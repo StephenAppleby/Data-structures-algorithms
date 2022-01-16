@@ -762,21 +762,20 @@ class BinaryTree:
         >>> list(node.key for node in tree.breadth_first())
         [0, 1, 2, 3, 4, 5, 6]
         """
-        if not self.root:
-            raise StopIteration
-        yield self.root
-        queue = DCQueue()
-        if self.root.l:
-            queue.enqueue(self.root.l)
-        if self.root.r:
-            queue.enqueue(self.root.r)
-        while len(queue) > 0:
-            node = queue.dequeue()
-            yield node
-            if node.l:
-                queue.enqueue(node.l)
-            if node.r:
-                queue.enqueue(node.r)
+        if self.root:
+            yield self.root
+            queue = DCQueue()
+            if self.root.l:
+                queue.enqueue(self.root.l)
+            if self.root.r:
+                queue.enqueue(self.root.r)
+            while len(queue) > 0:
+                node = queue.dequeue()
+                yield node
+                if node.l:
+                    queue.enqueue(node.l)
+                if node.r:
+                    queue.enqueue(node.r)
 
     def flatten(self):
         """
@@ -792,19 +791,19 @@ class BinaryTree:
         >>> list(node.key for node in tree.flatten())
         [3, 1, 4, 0, 5, 2, 6]
         """
-        if not self.root:
-            return
+        if self.root:
 
-        def rec_flatten(node):
-            if node.l:
-                for n in rec_flatten(node.l):
-                    yield n
-            yield node
-            if node.r:
-                for n in rec_flatten(node.r):
-                    yield n
+            def rec_flatten(node):
+                if node.l:
+                    for n in rec_flatten(node.l):
+                        yield n
+                yield node
+                if node.r:
+                    for n in rec_flatten(node.r):
+                        yield n
 
-        return rec_flatten(self.root)
+            for n in rec_flatten(self.root):
+                yield n
 
     def preorder(self):
         """
@@ -820,19 +819,19 @@ class BinaryTree:
         >>> list(node.key for node in tree.preorder())
         [0, 1, 3, 4, 2, 5, 6]
         """
+        if self.root:
 
-        def rec_preorder(node):
-            yield node
-            if node.l:
-                for n in rec_preorder(node.l):
-                    yield n
-            if node.r:
-                for n in rec_preorder(node.r):
-                    yield n
+            def rec_preorder(node):
+                yield node
+                if node.l:
+                    for n in rec_preorder(node.l):
+                        yield n
+                if node.r:
+                    for n in rec_preorder(node.r):
+                        yield n
 
-        if not self.root:
-            raise StopIteration
-        return rec_preorder(self.root)
+            for n in rec_preorder(self.root):
+                yield n
 
     def postorder(self):
         """
@@ -848,15 +847,19 @@ class BinaryTree:
         >>> list(node.key for node in tree.postorder())
         [3, 4, 1, 5, 6, 2, 0]
         """
-        if not self.root:
-            raise StopIteration
-        if self.l:
-            for n in self.l.postorder():
+        if self.root:
+
+            def rec_postorder(node):
+                if node.l:
+                    for n in rec_postorder(node.l):
+                        yield n
+                if node.r:
+                    for n in rec_postorder(node.r):
+                        yield n
+                yield node
+
+            for n in rec_postorder(self.root):
                 yield n
-        if self.r:
-            for n in self.r.postorder():
-                yield n
-        yield self
 
     def fill(self, key):
         """

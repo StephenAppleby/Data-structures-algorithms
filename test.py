@@ -27,6 +27,9 @@ def get_bst(count):
     return ds.BinarySearchTree(data=[x for x in range(count)])
 
 
+# Binary Tree
+
+
 def bt_init():
     test(isinstance(ds.BinaryTree(), ds.BinaryTree), True)
     got = display(get_bt(3))
@@ -122,6 +125,42 @@ def bt_is_balanced():
     test(tree.is_balanced(), False)
 
 
+def bt_breadth_first():
+    tree = get_bt(0)
+    test(list(tree.breadth_first()), [])
+    tree = get_bt(7)
+    got = [n.key for n in get_bt(7).breadth_first()]
+    exp = [0, 1, 2, 3, 4, 5, 6]
+    test(got, exp)
+
+
+def bt_flatten():
+    tree = get_bt(0)
+    test(list(tree.flatten()), [])
+    tree = get_bt(7)
+    got = [n.key for n in get_bt(7).flatten()]
+    exp = [3, 1, 4, 0, 5, 2, 6]
+    test(got, exp)
+
+
+def bt_preorder():
+    tree = get_bt(0)
+    test(list(tree.preorder()), [])
+    tree = get_bt(7)
+    got = [n.key for n in get_bt(7).preorder()]
+    exp = [0, 1, 3, 4, 2, 5, 6]
+    test(got, exp)
+
+
+def bt_postorder():
+    tree = get_bt(0)
+    test(list(tree.postorder()), [])
+    tree = get_bt(7)
+    got = [n.key for n in get_bt(7).postorder()]
+    exp = [3, 4, 1, 5, 6, 2, 0]
+    test(got, exp)
+
+
 def bt_fill():
     tree = get_bt(7)
     tree.delete(1)
@@ -140,6 +179,9 @@ def bt_copy():
     tree = get_bt(7)
     copy = tree.copy()
     test(display(copy), expect["bt"]["7"])
+
+
+# Binary Tree Node
 
 
 def btn_init():
@@ -187,6 +229,9 @@ def btn_get_height():
     test(tree.get(0).get_height(), 3)
     test(tree.get(9).get_height(), 0)
     test(tree.get(1).get_height(), 2)
+
+
+# Binary Search Tree
 
 
 def bst_init():
@@ -239,6 +284,10 @@ def suites():
             ("Is full", bt_is_full),
             ("Is complete", bt_is_complete),
             ("Is balanced", bt_is_balanced),
+            ("Breadth first", bt_breadth_first),
+            ("Flatten", bt_flatten),
+            ("Preorder", bt_preorder),
+            ("Postorder", bt_postorder),
             ("Fill", bt_fill),
             ("Get levels", bt_get_levels),
             ("Copy", bt_copy),
