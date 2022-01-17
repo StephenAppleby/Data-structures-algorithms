@@ -1,12 +1,18 @@
 def format_nodes(nodes, chars_width, item="key"):
+    # Cull copied nodes with no key. The nodes given here include the empties provided
+    # by the fill method
     if item == "key":
         return (
             f"{str(n.key):^3}" if n.key != None else " " * chars_width for n in nodes
         )
     if item == "depths":
-        return (f"{str(n.depth):^3}" for n in nodes)
+        return (
+            f"{str(n.depth):^3}" if n.key != None else " " * chars_width for n in nodes
+        )
     if item == "heights":
-        return (f"{str(n.height):^3}" for n in nodes)
+        return (
+            f"{str(n.height):^3}" if n.key != None else " " * chars_width for n in nodes
+        )
 
 
 def display(tree, item="key"):
