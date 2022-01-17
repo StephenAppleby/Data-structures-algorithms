@@ -321,6 +321,15 @@ class BinaryTree:
             self.depth = depth
             self.parent = parent
             self.tree = tree
+            self.height = 0
+            self.recalc_parent_heights()
+
+        def recalc_parent_heights(self):
+            if self.parent:
+                lh = self.parent.l.height if self.parent.l else -1
+                rh = self.parent.r.height if self.parent.r else -1
+                self.parent.height = 1 + max(lh, rh)
+                self.parent.recalc_parent_heights()
 
         def detach(self):
             if self is self.tree.root:
@@ -329,13 +338,20 @@ class BinaryTree:
                 self.parent.l = None
             elif self.side == "r":
                 self.parent.r = None
+            self.recalc_parent_heights()
 
         def move(self, destination, keep_children=False):
             """
             Replace destination with self
             """
             # Detach
+            parent = None
+            if self.parent:
+                parent = self.parent
             self.detach()
+            if parent:
+                parent.height = parent.get_height()
+                parent.recalc_parent_heights()
             # If not going to root attach to parent
             if destination.parent:
                 self.parent = destination.parent
@@ -360,6 +376,8 @@ class BinaryTree:
                 if destination.r and self is not destination.r:
                     self.r = destination.r
                     destination.r.parent = self
+                self.height = self.get_height()
+            self.recalc_parent_heights()
 
         def add_l(self, key):
             """
@@ -412,10 +430,10 @@ class BinaryTree:
                 return 0
             lh = rh = 0
             if self.l:
-                lh = 1 + self.l.get_height()
+                lh = self.l.get_height()
             if self.r:
-                rh = 1 + self.r.get_height()
-            return max(lh, rh)
+                rh = self.r.get_height()
+            return max(lh, rh) + 1
 
     def extend_default(self, keys):
         """
@@ -738,11 +756,8 @@ class BinaryTree:
                 return False
         return True
 
-    def display(self):
-        print(util.display(self))
-
-    def display_depths(self):
-        print(util.display(self, item="depths"))
+    def display(self, item="key"):
+        print(util.display(self, item))
 
     def breadth_first(self):
         """

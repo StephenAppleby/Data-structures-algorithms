@@ -37,6 +37,25 @@ def display(tree, item="key"):
     # Fill with empties. The fill method returns a perfect tree
     # which makes it much easier to format later
     copy_with_gaps.fill(None)
+    # Now we have to carefully recalculate the height of each node to make sure that
+    # our full tree still looks empty
+    if item == "heights":
+        leaves = []
+        for node in copy_with_gaps.flatten():
+            is_leaf = True
+            if not node.key:
+                is_leaf = False
+            if node.l:
+                if node.l.key:
+                    is_leaf = False
+            if node.r:
+                if node.r.key:
+                    is_leaf = False
+            if is_leaf:
+                leaves.append(node)
+        for leaf in leaves:
+            leaf.height = 0
+            leaf.recalc_parent_heights()
     # We'll be iterating over each level of the tree starting from depth = 0
     levels = copy_with_gaps.get_levels()
     for level, nodes in enumerate(levels):

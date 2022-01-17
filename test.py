@@ -43,6 +43,17 @@ def bt_display_depths():
     test(got, exp)
 
 
+def bt_display_heights():
+    tree = get_bt(15)
+    test(display(tree, item="heights"), expect["bt"]["15h"])
+    tree.delete(4)
+    tree.delete(3)
+    test([node.height for node in tree.breadth_first()], [3, 0, 2, 1, 1, 0, 0, 0, 0])
+    tree.get(6).move(tree.get(1), keep_children=True)
+    tree.get(5).move(tree.get(2))
+    test([node.height for node in tree.breadth_first()], [2, 1, 0, 0, 0])
+
+
 def bt_add():
     tree = get_bt(1)
     got = display(tree)
@@ -277,6 +288,7 @@ def suites():
         "BinaryTree": [
             ("Init", bt_init),
             ("Display depths", bt_display_depths),
+            ("Display heights", bt_display_heights),
             ("Add", bt_add),
             ("Get", bt_get),
             ("Delete", bt_delete),
