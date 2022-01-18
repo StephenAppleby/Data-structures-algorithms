@@ -27,6 +27,10 @@ def get_bst(count):
     return ds.BinarySearchTree(data=[x for x in range(count)])
 
 
+def get_avl(count):
+    return ds.AVLTree(data=[x for x in range(count)])
+
+
 # Binary Tree
 
 
@@ -283,6 +287,17 @@ def bst_get():
     test(bst.get(0).key, 0)
 
 
+def avlnode_left_rotate():
+
+    avl = get_avl(7)
+    avl.delete(0)
+    avl.delete(2)
+    avl.display()
+    avl.get(3).left_rotate()
+    node = avl.get(4)
+    avl.display()
+
+
 def suites():
     return {
         "BinaryTree": [
@@ -317,6 +332,7 @@ def suites():
             ("Get", bst_get),
         ],
         "AVLTree": [],
+        "AVLNode": [("Left rotate", avlnode_left_rotate)],
     }
 
 
