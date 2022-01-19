@@ -122,3 +122,19 @@ def display(tree, item="key"):
             output = output.rstrip()
             output += "\n"
     return output
+
+
+def inspect(tree):
+    return [inspect_node(node) for node in tree.flatten()]
+
+
+def inspect_node(node):
+    return {
+        "Key": node.key,
+        "Left": node.l.key if node.l else None,
+        "Right": node.r.key if node.r else None,
+        "Parent": node.parent.key if node.parent else None,
+        "Side": node.side,
+        "Height": node.side,
+        "Depth": node.depth,
+    }

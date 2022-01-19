@@ -19,6 +19,14 @@ def test(got, exp, raw=False):
     assert got == exp, expected(got, exp, raw)
 
 
+def format_inspection(insp):
+    output = ""
+    for node in insp:
+        output += "".join([f"{k}: {v}".ljust(14) for k, v in node.items()])
+        output += "\n"
+    return output
+
+
 def get_bt(count):
     return ds.BinaryTree(data=[x for x in range(count)])
 
@@ -288,14 +296,12 @@ def bst_get():
 
 
 def avlnode_left_rotate():
-
     avl = get_avl(7)
     avl.delete(0)
     avl.delete(2)
-    avl.display()
     avl.get(3).left_rotate()
-    node = avl.get(4)
     avl.display()
+    print(format_inspection(avl.inspect()))
 
 
 def suites():

@@ -342,9 +342,19 @@ class BinaryTree:
             elif self.side == "r":
                 self.parent.r = None
             self.side = None
+            self.parent = None
             if parent:
                 parent.height = parent.get_height()
                 parent.recalc_parent_heights()
+
+        def attach(self, node, side):
+            if side == "l":
+                self.l = node
+                node.side = "l"
+            if side == "r":
+                self.r = node
+                node.side = "r"
+            node.parent = self
 
         def move(self, destination, keep_children=False):
             """
@@ -440,6 +450,9 @@ class BinaryTree:
             if self.r:
                 rh = self.r.get_height()
             return max(lh, rh) + 1
+
+        def inspect(self):
+            return util.inspect_node(self)
 
     def extend_default(self, keys):
         """
@@ -767,6 +780,9 @@ class BinaryTree:
 
     def display(self, item="key"):
         print(util.display(self, item))
+
+    def inspect(self):
+        return util.inspect(self)
 
     def breadth_first(self):
         """
@@ -1209,7 +1225,7 @@ class AVLTree(BinarySearchTree):
             if child.l:
                 cl = child.l
                 cl.detach()
-                self.r = cl
+                self.attach(cl, "r")
             if not self.parent:
                 self.detach()
                 self.tree.root = child
@@ -1217,11 +1233,10 @@ class AVLTree(BinarySearchTree):
                 parent = self.parent
                 side = self.side
                 self.detach()
-                if side == "l":
-                    parent.l = child
-                if side == "r":
-                    parent.r = child
-            child.l = self
+                parent.attach(child, side)
+            child.attach(self, "l")
+            child.height = child.get_height()
+            child.recalc_parent_heights()
 
         def add_l(self, key):
             """

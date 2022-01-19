@@ -154,6 +154,20 @@ expect = {
  ┌─┴─┐   ┌─┴─┐
  0   2   4   6""",
     },
+    "avl": {
+        "5lr": """\
+       5
+   ┌───┴───┐
+   3       6
+ ┌─┴─┐
+ 1   4""",
+        "5lri": """\
+key: 1         l: NA          r: NA          parent: 3      side: l        height: 0
+key: 3         l: 1           r: 4           parent: 5      side: l        height: 1
+key: 4         l: NA          r: NA          parent: 3      side: r        height: 0
+key: 5         l: 3           r: 6           parent: root   side: None     height: 2
+key: 6         l: NA          r: NA          parent: 5      side: r        height: 0""",
+    },
 }
 
 example = {"bt": {}}
