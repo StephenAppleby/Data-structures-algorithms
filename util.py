@@ -135,6 +135,6 @@ def inspect_node(node):
         "Right": node.r.key if node.r else None,
         "Parent": node.parent.key if node.parent else None,
         "Side": node.side,
-        "Height": node.side,
-        "Depth": node.depth,
+        "Height": node.height,
+        # "Depth": node.depth,
     }

@@ -161,12 +161,48 @@ expect = {
    3       6
  ┌─┴─┐
  1   4""",
-        "5lri": """\
-key: 1         l: NA          r: NA          parent: 3      side: l        height: 0
-key: 3         l: 1           r: 4           parent: 5      side: l        height: 1
-key: 4         l: NA          r: NA          parent: 3      side: r        height: 0
-key: 5         l: 3           r: 6           parent: root   side: None     height: 2
-key: 6         l: NA          r: NA          parent: 5      side: r        height: 0""",
+        "5lri": [
+            {
+                "Key": 1,
+                "Left": None,
+                "Right": None,
+                "Parent": 3,
+                "Side": "l",
+                "Height": 0,
+            },
+            {
+                "Key": 3,
+                "Left": 1,
+                "Right": 4,
+                "Parent": 5,
+                "Side": "l",
+                "Height": 1,
+            },
+            {
+                "Key": 4,
+                "Left": None,
+                "Right": None,
+                "Parent": 3,
+                "Side": "r",
+                "Height": 0,
+            },
+            {
+                "Key": 5,
+                "Left": 3,
+                "Right": 6,
+                "Parent": None,
+                "Side": None,
+                "Height": 2,
+            },
+            {
+                "Key": 6,
+                "Left": None,
+                "Right": None,
+                "Parent": 5,
+                "Side": "r",
+                "Height": 0,
+            },
+        ],
     },
 }
 

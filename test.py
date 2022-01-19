@@ -7,16 +7,17 @@ from test_util import expect, example
 assertions = 0
 
 
-def expected(got, expect, raw=False):
+def expected(got, expect, raw=False, insp=False):
     return "Expected:\n{}\nGot:\n{}".format(
-        expect if not raw else repr(expect), got if not raw else repr(got)
+        format_inspection(expect) if insp else repr(expect) if raw else expect,
+        format_inspection(got) if insp else repr(got) if raw else got,
     )
 
 
-def test(got, exp, raw=False):
+def test(got, exp, raw=False, insp=False):
     global assertions
     assertions += 1
-    assert got == exp, expected(got, exp, raw)
+    assert got == exp, expected(got, exp, raw, insp)
 
 
 def format_inspection(insp):
@@ -300,8 +301,7 @@ def avlnode_left_rotate():
     avl.delete(0)
     avl.delete(2)
     avl.get(3).left_rotate()
-    avl.display()
-    print(format_inspection(avl.inspect()))
+    test(avl.inspect(), expect["avl"]["5lri"], insp=True)
 
 
 def suites():
