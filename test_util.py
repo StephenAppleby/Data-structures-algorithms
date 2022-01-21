@@ -161,48 +161,20 @@ expect = {
    3       6
  ┌─┴─┐
  1   4""",
-        "5lri": [
-            {
-                "Key": 1,
-                "Left": None,
-                "Right": None,
-                "Parent": 3,
-                "Side": "l",
-                "Height": 0,
-            },
-            {
-                "Key": 3,
-                "Left": 1,
-                "Right": 4,
-                "Parent": 5,
-                "Side": "l",
-                "Height": 1,
-            },
-            {
-                "Key": 4,
-                "Left": None,
-                "Right": None,
-                "Parent": 3,
-                "Side": "r",
-                "Height": 0,
-            },
-            {
-                "Key": 5,
-                "Left": 3,
-                "Right": 6,
-                "Parent": None,
-                "Side": None,
-                "Height": 2,
-            },
-            {
-                "Key": 6,
-                "Left": None,
-                "Right": None,
-                "Parent": 5,
-                "Side": "r",
-                "Height": 0,
-            },
-        ],
+        "5lri": """\
+Key: 1        Left: None    Right: None   Parent: 3     Side: l       Height: 0
+Key: 3        Left: 1       Right: 4      Parent: 5     Side: l       Height: 1
+Key: 4        Left: None    Right: None   Parent: 3     Side: r       Height: 0
+Key: 5        Left: 3       Right: 6      Parent: None  Side: None    Height: 2
+Key: 6        Left: None    Right: None   Parent: 5     Side: r       Height: 0\n""",
+        "7rri": """\
+Key: 0        Left: None    Right: None   Parent: 1     Side: l       Height: 0
+Key: 1        Left: 0       Right: 3      Parent: None  Side: None    Height: 3
+Key: 2        Left: None    Right: None   Parent: 3     Side: l       Height: 0
+Key: 3        Left: 2       Right: 5      Parent: 1     Side: r       Height: 2
+Key: 4        Left: None    Right: None   Parent: 5     Side: l       Height: 0
+Key: 5        Left: 4       Right: 6      Parent: 3     Side: r       Height: 1
+Key: 6        Left: None    Right: None   Parent: 5     Side: r       Height: 0\n""",
     },
 }
 

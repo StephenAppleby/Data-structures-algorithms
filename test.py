@@ -1,4 +1,5 @@
 import ds
+import random
 import traceback
 from util import display
 from test_util import expect, example
@@ -7,25 +8,17 @@ from test_util import expect, example
 assertions = 0
 
 
-def expected(got, expect, raw=False, insp=False):
+def expected(got, expect, raw=False):
     return "Expected:\n{}\nGot:\n{}".format(
-        format_inspection(expect) if insp else repr(expect) if raw else expect,
-        format_inspection(got) if insp else repr(got) if raw else got,
+        repr(expect) if raw else expect,
+        repr(got) if raw else got,
     )
 
 
-def test(got, exp, raw=False, insp=False):
+def test(got, exp, raw=False):
     global assertions
     assertions += 1
-    assert got == exp, expected(got, exp, raw, insp)
-
-
-def format_inspection(insp):
-    output = ""
-    for node in insp:
-        output += "".join([f"{k}: {v}".ljust(14) for k, v in node.items()])
-        output += "\n"
-    return output
+    assert got == exp, expected(got, exp, raw)
 
 
 def get_bt(count):
@@ -301,7 +294,21 @@ def avlnode_left_rotate():
     avl.delete(0)
     avl.delete(2)
     avl.get(3).left_rotate()
-    test(avl.inspect(), expect["avl"]["5lri"], insp=True)
+    test(avl.inspect(), expect["avl"]["5lri"])
+
+
+def avlnode_right_rotate():
+    avl = get_avl(7)
+    avl.root.right_rotate()
+    test(avl.inspect(), expect["avl"]["7rri"])
+
+
+def avl_add():
+    avl = get_avl(0)
+    numbers = [x for x in range(1000)]
+    for x in range(100):
+        avl.add(numbers.pop(numbers.index(random.choice(numbers))))
+        test(avl.is_balanced(), True)
 
 
 def suites():
@@ -337,8 +344,11 @@ def suites():
             ("Delete", bst_delete),
             ("Get", bst_get),
         ],
-        "AVLTree": [],
-        "AVLNode": [("Left rotate", avlnode_left_rotate)],
+        "AVLTree": [("Add", avl_add)],
+        "AVLNode": [
+            ("Left rotate", avlnode_left_rotate),
+            ("Right rotate", avlnode_right_rotate),
+        ],
     }
 
 

@@ -125,7 +125,7 @@ def display(tree, item="key"):
 
 
 def inspect(tree):
-    return [inspect_node(node) for node in tree.flatten()]
+    return format_inspection([inspect_node(node) for node in tree.flatten()])
 
 
 def inspect_node(node):
@@ -138,3 +138,12 @@ def inspect_node(node):
         "Height": node.height,
         # "Depth": node.depth,
     }
+
+
+def format_inspection(insp):
+    output = ""
+    for node in insp:
+        output += "".join([f"{k}: {v}".ljust(14) for k, v in node.items()])
+        output = output.strip()
+        output += "\n"
+    return output

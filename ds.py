@@ -326,8 +326,8 @@ class BinaryTree:
 
         def recalc_parent_heights(self):
             if self.parent:
-                lh = self.parent.l.height if self.parent.l else -1
-                rh = self.parent.r.height if self.parent.r else -1
+                lh = self.parent.l.height if self.parent.l else 0
+                rh = self.parent.r.height if self.parent.r else 0
                 self.parent.height = 1 + max(lh, rh)
                 self.parent.recalc_parent_heights()
 
@@ -405,6 +405,7 @@ class BinaryTree:
             self.l = BinaryTree.BTNode(
                 key, depth=self.depth + 1, side="l", parent=self, tree=self.tree
             )
+            return self.l
 
         def add_r(self, key):
             """
@@ -416,6 +417,7 @@ class BinaryTree:
             self.r = BinaryTree.BTNode(
                 key, depth=self.depth + 1, side="r", parent=self, tree=self.tree
             )
+            return self.r
 
         def get_height(self):
             """
@@ -454,7 +456,7 @@ class BinaryTree:
         def inspect(self):
             return util.inspect_node(self)
 
-    def extend_default(self, keys):
+    def extend_default(self, data=[]):
         """
         Add each key in keys to the tree in sequence.
 
@@ -472,7 +474,7 @@ class BinaryTree:
          ┌─┴─┐   ┌─┴─┐
          3   4   5   6
         """
-        for k in keys:
+        for k in data:
             self.add(k)
 
     def get_default(self, key):
@@ -548,18 +550,16 @@ class BinaryTree:
 
         """
         if not self.root:
-            self.add_root(key)
-            return 0
+            return self.add_root(key)
         for node in self.breadth_first():
             if not node.l:
-                node.add_l(key)
-                return node.depth + 1
+                return node.add_l(key)
             if not node.r:
-                node.add_r(key)
-                return node.depth + 1
+                return node.add_r(key)
 
     def add_root(self, key):
         self.root = BinaryTree.BTNode(key=key, tree=self)
+        return self.root
 
     def is_perfect(self):
         """
@@ -1019,18 +1019,15 @@ class BinarySearchTree(BinaryTree):
                 if node.l:
                     return rec_add(node.l, key)
                 else:
-                    node.add_l(key)
-                    return node.depth + 1
+                    return node.add_l(key)
             if key > node.key:
                 if node.r:
                     return rec_add(node.r, key)
                 else:
-                    node.add_r(key)
-                    return node.depth + 1
+                    return node.add_r(key)
 
         if not self.root:
-            self.root = self.BTNode(key=key, tree=self)
-            return 0
+            return self.add_root(key)
         return rec_add(self.root, key)
 
     def balance(self, data=[]):
@@ -1213,7 +1210,7 @@ class AVLTree(BinarySearchTree):
             data = kwargs.pop("data")
         super().__init__(**kwargs)
         self.add = self.add_avl
-        self.extend = self.balance
+        self.extend = self.extend_default
         self.delete = self.delete_bst
         self.get = self.get_bst
         self.extend(data=data)
@@ -1238,6 +1235,33 @@ class AVLTree(BinarySearchTree):
             child.height = child.get_height()
             child.recalc_parent_heights()
 
+        def right_rotate(self):
+            child = self.l
+            child.detach()
+            if child.r:
+                cr = child.r
+                cr.detach()
+                self.attach(cr, "l")
+            if not self.parent:
+                self.detach()
+                self.tree.root = child
+            else:
+                parent = self.parent
+                side = self.side
+                self.detach()
+                parent.attach(child, side)
+            child.attach(self, "r")
+            child.height = child.get_height()
+            child.recalc_parent_heights()
+
+        def left_right_rotate(self):
+            self.l.left_rotate()
+            self.right_rotate()
+
+        def right_left_rotate(self):
+            self.r.right_rotate()
+            self.left_rotate()
+
         def add_l(self, key):
             """
             Manually insert a node to the left of self.
@@ -1248,6 +1272,7 @@ class AVLTree(BinarySearchTree):
             self.l = AVLTree.AVLNode(
                 key, depth=self.depth + 1, side="l", parent=self, tree=self.tree
             )
+            return self.l
 
         def add_r(self, key):
             """
@@ -1259,31 +1284,32 @@ class AVLTree(BinarySearchTree):
             self.r = AVLTree.AVLNode(
                 key, depth=self.depth + 1, side="r", parent=self, tree=self.tree
             )
+            return self.r
 
     def add_avl(self, key):
-        def rec_add(node, key):
-            if key == node.key:
-                raise Exception("Duplicates not allowed in binary search tree")
-            if key < node.key:
-                if node.l:
-                    return rec_add(node.l, key)
-                else:
-                    node.add_l(key)
-                    return node.depth + 1
-            if key > node.key:
-                if node.r:
-                    return rec_add(node.r, key)
-                else:
-                    node.add_r(key)
-                    return node.depth + 1
+        node = self.add_bst(key)
+        node = node.parent
 
-        if not self.root:
-            self.add_root(key)
-            return 0
-        return rec_add(self.root, key)
+        while node:
+            lh = node.l.height if node.l else -1
+            rh = node.r.height if node.r else -1
+            bal_fac = lh - rh
+            if bal_fac > 1:
+                if key < node.l.key:
+                    node.right_rotate()
+                else:
+                    node.left_right_rotate()
+            if bal_fac < -1:
+                if key > node.r.key:
+                    node.left_rotate()
+                else:
+                    node.right_left_rotate()
+            node.recalc_parent_heights()
+            node = node.parent
 
     def add_root(self, key):
         self.root = AVLTree.AVLNode(key=key, tree=self)
+        return self.root
 
 
 def bt_example(i):
