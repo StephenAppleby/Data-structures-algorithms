@@ -1179,21 +1179,33 @@ class BinarySearchTree(BinaryTree):
         to_delete = self.get(key)
         # Case 1: Leaf node
         if not to_delete.l and not to_delete.r:
+            parent = to_delete.parent
             to_delete.detach()
+            return parent
         # Case 2: One child
         elif bool(to_delete.l) != bool(to_delete.r):
             child = to_delete.l if to_delete.l else to_delete.r
             # Replace child with self
             child.move(to_delete, keep_children=True)
+            return child.parent
         # Case 3: Two children
         else:
             successor = to_delete.r
             while successor.l:
                 successor = successor.l
+            # Rescue parent
+            parent = successor.parent
+            side = successor.side
+            successor.detach()
             # Rescue successors right child
             if successor.r:
-                successor.r.move(successor, keep_children=True)
+                child = successor.r
+                child.detach()
+                parent.attach(child, side)
             successor.move(to_delete)
+            if parent is to_delete:
+                return successor
+            return parent
 
     def is_bst(self):
         """
@@ -1211,7 +1223,7 @@ class AVLTree(BinarySearchTree):
         super().__init__(**kwargs)
         self.add = self.add_avl
         self.extend = self.extend_default
-        self.delete = self.delete_bst
+        self.delete = self.delete_avl
         self.get = self.get_bst
         self.extend(data=data)
 
@@ -1262,6 +1274,11 @@ class AVLTree(BinarySearchTree):
             self.r.right_rotate()
             self.left_rotate()
 
+        def get_balance_factor(self):
+            lh = self.l.height if self.l else -1
+            rh = self.r.height if self.r else -1
+            return lh - rh
+
         def add_l(self, key):
             """
             Manually insert a node to the left of self.
@@ -1288,12 +1305,9 @@ class AVLTree(BinarySearchTree):
 
     def add_avl(self, key):
         node = self.add_bst(key)
-        node = node.parent
 
-        while node:
-            lh = node.l.height if node.l else -1
-            rh = node.r.height if node.r else -1
-            bal_fac = lh - rh
+        def balance(node, key):
+            bal_fac = node.get_balance_factor()
             if bal_fac > 1:
                 if key < node.l.key:
                     node.right_rotate()
@@ -1305,7 +1319,32 @@ class AVLTree(BinarySearchTree):
                 else:
                     node.right_left_rotate()
             node.recalc_parent_heights()
-            node = node.parent
+            if node.parent:
+                balance(node.parent, key)
+
+        balance(node, key)
+
+    def delete_avl(self, key):
+        node = self.delete_bst(key)
+
+        def balance(node):
+            bal_fac = node.get_balance_factor()
+            if bal_fac > 1:
+                if node.l.get_balance_factor() >= 0:
+                    node.right_rotate()
+                else:
+                    node.left_right_rotate()
+            if bal_fac < -1:
+                if node.r.get_balance_factor() <= 0:
+                    node.left_rotate()
+                else:
+                    node.right_left_rotate()
+            node.height = node.get_height()
+            node.recalc_parent_heights()
+            if node.parent:
+                balance(node.parent)
+
+        balance(node)
 
     def add_root(self, key):
         self.root = AVLTree.AVLNode(key=key, tree=self)

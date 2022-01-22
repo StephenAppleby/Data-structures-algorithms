@@ -4,6 +4,7 @@ import traceback
 from util import display
 from test_util import expect, example
 
+from time import sleep
 
 assertions = 0
 
@@ -306,8 +307,23 @@ def avlnode_right_rotate():
 def avl_add():
     avl = get_avl(0)
     numbers = [x for x in range(1000)]
-    for x in range(100):
-        avl.add(numbers.pop(numbers.index(random.choice(numbers))))
+    for x in range(10):
+        y = numbers.pop(random.randint(0, len(numbers) - 1))
+        avl.add(y)
+        test(avl.is_balanced(), True)
+
+
+def avl_delete():
+    avl = get_avl(0)
+    numbers = [x for x in range(1000)]
+    contents = []
+    for x in range(80):
+        y = numbers.pop(random.randint(0, len(numbers) - 1))
+        avl.add(y)
+        contents.append(y)
+    for x in range(78):
+        y = contents.pop(random.randint(0, len(contents) - 1))
+        avl.delete(y)
         test(avl.is_balanced(), True)
 
 
@@ -344,7 +360,7 @@ def suites():
             ("Delete", bst_delete),
             ("Get", bst_get),
         ],
-        "AVLTree": [("Add", avl_add)],
+        "AVLTree": [("Add", avl_add), ("Delete", avl_delete)],
         "AVLNode": [
             ("Left rotate", avlnode_left_rotate),
             ("Right rotate", avlnode_right_rotate),
