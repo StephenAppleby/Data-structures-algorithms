@@ -44,23 +44,6 @@ def bt_init():
     test(got, exp)
 
 
-def bt_display_depths():
-    got = display(get_bt(7), item="depths")
-    exp = expect["bt"]["7d"]
-    test(got, exp)
-
-
-def bt_display_heights():
-    tree = get_bt(15)
-    test(display(tree, item="heights"), expect["bt"]["15h"])
-    tree.delete(4)
-    tree.delete(3)
-    test([node.height for node in tree.breadth_first()], [3, 0, 2, 1, 1, 0, 0, 0, 0])
-    tree.get(6).move(tree.get(1), keep_children=True)
-    tree.get(5).move(tree.get(2))
-    test([node.height for node in tree.breadth_first()], [2, 1, 0, 0, 0])
-
-
 def bt_add():
     tree = get_bt(1)
     got = display(tree)
@@ -179,26 +162,6 @@ def bt_postorder():
     test(got, exp)
 
 
-def bt_fill():
-    tree = get_bt(7)
-    tree.delete(1)
-    tree.fill(7)
-    test(display(tree), expect["bt"]["7f"])
-
-
-def bt_get_levels():
-    tree = get_bt(7)
-    got = [[n.key for n in level] for level in tree.get_levels()]
-    exp = [[0], [1, 2], [3, 4, 5, 6]]
-    test(got, exp)
-
-
-def bt_copy():
-    tree = get_bt(7)
-    copy = tree.copy()
-    test(display(copy), expect["bt"]["7"])
-
-
 # Binary Tree Node
 
 
@@ -208,38 +171,6 @@ def btn_init():
     tree = get_bt(3)
     node = tree.get(2)
     test(node.key, 2)
-    test(node.side, "r")
-    test(node.depth, 1)
-    test(node.parent is tree.root, True)
-    test(node.tree is tree, True)
-
-
-def btn_detach():
-    tree = get_bt(5)
-    tree.get(1).detach()
-    test(display(tree), expect["bt"]["2d"])
-    test(tree.root.l, None)
-
-
-def btn_move():
-    tree = get_bt(7)
-    tree.get(3).move(tree.get(2))
-    test(display(tree), expect["bt"]["6ma"])
-    test(tree.get(3).side, "r")
-    test(tree.get(3).depth, 1)
-    test(tree.get(3).parent is tree.root, True)
-    test(tree.get(3).tree is tree, True)
-    tree = get_bt(7)
-    tree.get(5).move(tree.root)
-    test(display(tree), expect["bt"]["6mb"])
-    tree.get(2).move(tree.root)
-    test(display(tree), expect["bt"]["4m"])
-
-    tree = get_bt(1)
-    tree.root.add_l(1)
-    tree.root.l.add_r(2)
-    tree.get(2).move(tree.get(1), keep_children=True)
-    test(display(tree), expect["bt"]["2m"])
 
 
 def btn_get_height():
@@ -255,8 +186,6 @@ def btn_get_height():
 def bst_init():
     test(isinstance(ds.BinarySearchTree(), ds.BinarySearchTree), True)
     test(display(get_bst(1)), " 0")
-    bst = get_bst(7)
-    test(bst.get(4).tree is bst, True)
 
 
 def bst_balance_add():
@@ -331,8 +260,6 @@ def suites():
     return {
         "BinaryTree": [
             ("Init", bt_init),
-            ("Display depths", bt_display_depths),
-            ("Display heights", bt_display_heights),
             ("Add", bt_add),
             ("Get", bt_get),
             ("Delete", bt_delete),
@@ -344,14 +271,9 @@ def suites():
             ("Flatten", bt_flatten),
             ("Preorder", bt_preorder),
             ("Postorder", bt_postorder),
-            ("Fill", bt_fill),
-            ("Get levels", bt_get_levels),
-            ("Copy", bt_copy),
         ],
         "BTNode": [
             ("Init", btn_init),
-            ("Detach", btn_detach),
-            ("Move", btn_move),
             ("Get height", btn_get_height),
         ],
         "BinarySearchTree": [

@@ -1,21 +1,10 @@
-def format_nodes(nodes, chars_width, item="key"):
+def format_nodes(nodes, chars_width):
     # Cull copied nodes with no key. The nodes given here include the empties provided
     # by the fill method
-    if item == "key":
-        return (
-            f"{str(n.key):^3}" if n.key != None else " " * chars_width for n in nodes
-        )
-    if item == "depths":
-        return (
-            f"{str(n.depth):^3}" if n.key != None else " " * chars_width for n in nodes
-        )
-    if item == "heights":
-        return (
-            f"{str(n.height):^3}" if n.key != None else " " * chars_width for n in nodes
-        )
+    return (f"{str(n.key):^3}" if n.key != None else " " * chars_width for n in nodes)
 
 
-def display(tree, item="key"):
+def display(tree):
     """
     Renders a binary tree to the console in a human readable format.
 
@@ -31,33 +20,43 @@ def display(tree, item="key"):
      ┌─┴─┐   ┌─┴─┐
      3   4   5   6
     """
+    if not tree.root:
+        return
     output = ""
-    # Copy the tree and fill
-    copy_with_gaps = tree.copy()
-    # Fill with empties. The fill method returns a perfect tree
-    # which makes it much easier to format later
-    copy_with_gaps.fill(None)
-    # Now we have to carefully recalculate the height of each node to make sure that
-    # our full tree still looks empty
-    if item == "heights":
-        leaves = []
-        for node in copy_with_gaps.flatten():
-            is_leaf = True
-            if not node.key:
-                is_leaf = False
-            if node.l:
-                if node.l.key:
-                    is_leaf = False
-            if node.r:
-                if node.r.key:
-                    is_leaf = False
-            if is_leaf:
-                leaves.append(node)
-        for leaf in leaves:
-            leaf.height = 0
-            leaf.recalc_parent_heights()
-    # We'll be iterating over each level of the tree starting from depth = 0
-    levels = copy_with_gaps.get_levels()
+
+    def copy_nodes(original_node, copy_node):
+        if original_node.l:
+            copy_node.l = tree.BTNode(original_node.l.key)
+            copy_nodes(original_node.l, copy_node.l)
+        if original_node.r:
+            copy_node.r = tree.BTNode(original_node.r.key)
+            copy_nodes(original_node.r, copy_node.r)
+
+    copy_root = tree.BTNode(tree.root.key)
+    copy_nodes(tree.root, copy_root)
+    copy = tree.get_tree(root=copy_root)
+    while not copy.is_perfect():
+        copy.add(None)
+
+    def depth_node_pairs(depth, node):
+        if node.l:
+            for d, n in depth_node_pairs(depth + 1, node.l):
+                yield (d, n)
+        yield (depth, node)
+        if node.r:
+            for d, n in depth_node_pairs(depth + 1, node.r):
+                yield (d, n)
+
+    def lvls(tr):
+        output = [[]]
+        for depth, node in depth_node_pairs(0, tr.root):
+            while len(output) <= depth:
+                output.append([])
+            output[depth].append(node)
+        return output
+
+    levels = lvls(copy)
+
     for level, nodes in enumerate(levels):
         # The amount of padding is inversely proportional to level depth
         inv_row = len(levels) - (level + 1)
@@ -72,7 +71,7 @@ def display(tree, item="key"):
         output += half_pad
         # Ensure that we have the string key of each node to three chars
         # or the same amount of spaces
-        formatted_nodes = format_nodes(nodes, chars_width, item)
+        formatted_nodes = format_nodes(nodes, chars_width)
         output += pad.join(formatted_nodes)
         output = output.rstrip()
         # Add the pipes after each level except the last
@@ -133,10 +132,6 @@ def inspect_node(node):
         "Key": node.key,
         "Left": node.l.key if node.l else None,
         "Right": node.r.key if node.r else None,
-        "Parent": node.parent.key if node.parent else None,
-        "Side": node.side,
-        "Height": node.height,
-        # "Depth": node.depth,
     }
 
 
