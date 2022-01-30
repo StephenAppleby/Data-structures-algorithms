@@ -128,17 +128,20 @@ def inspect(tree):
 
 
 def inspect_node(node):
-    return {
+    output = {
         "Key": node.key,
         "Left": node.l.key if node.l else None,
         "Right": node.r.key if node.r else None,
     }
+    if node.height is not None:
+        output["Height"] = node.height
+    return output
 
 
 def format_inspection(insp):
     output = ""
     for node in insp:
-        output += "".join([f"{k}: {v}".ljust(14) for k, v in node.items()])
+        output += "".join([f"{k}: {v}".ljust(18) for k, v in node.items()])
         output = output.strip()
         output += "\n"
     return output

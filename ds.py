@@ -370,8 +370,17 @@ class BinaryTree:
                 rh = self.r.get_height()
             return max(lh, rh) + 1
 
+        def get_child(self, side):
+            if side == "l":
+                return self.l
+            if side == "r":
+                return self.r
+
         def inspect(self):
             return util.inspect_node(self)
+
+    def add_root(self, key):
+        self.root = BinaryTree.BTNode(key)
 
     def extend_default(self, data=[]):
         """
@@ -867,7 +876,7 @@ class BinarySearchTree(BinaryTree):
                     return node.r
 
         if not self.root:
-            self.root = self.BTNode(key)
+            self.add_root(key)
             return self.root
         return rec_add(self.root, key)
 
@@ -1019,16 +1028,15 @@ class BinarySearchTree(BinaryTree):
         """
 
         def rec_del(node):
-            if node.l and node.l.key == key:
-                node.l = get_replacement(node.l)
-                return node.l
-            if node.r and node.r.key == key:
-                node.r = get_replacement(node.r)
-                return node.r
-            if node.l and key < node.key:
-                return rec_del(node.l)
-            if node.r and key > node.key:
-                return rec_del(node.r)
+            if key == node.key:
+                return get_replacement(node)
+            elif node.l and key < node.key:
+                node.attach_node(rec_del(node.l), "l")
+            elif node.r and key > node.key:
+                node.attach_node(rec_del(node.r), "r")
+            else:
+                raise Exception("Attempted to delete missing key from tree:", key)
+            return node
 
         def get_replacement(node):
             # Determine which children are present
@@ -1048,7 +1056,7 @@ class BinarySearchTree(BinaryTree):
             # Two children -> Find successor
             # Successor is node.r
             if not node.r.l:
-                node.r.l = node.l
+                node.r.attach_node(node.l, "l")
                 return node.r
             # Successor is not node.r
             parent = node.r
@@ -1057,16 +1065,12 @@ class BinarySearchTree(BinaryTree):
                 parent = successor
                 successor = successor.l
             # Ensure that we save all the children we need to
-            parent.del_node("l")
-            parent.l = successor.r
-            successor.l = node.l
-            successor.r = node.r
+            parent.attach_node(successor.r, "l")
+            successor.attach_node(node.l, "l")
+            successor.attach_node(node.r, "r")
             return successor
 
-        if self.root.key == key:
-            self.root = get_replacement(self.root)
-            return self.root
-        return rec_del(self.root)
+        self.root = rec_del(self.root)
 
     def is_bst(self):
         """
@@ -1089,127 +1093,149 @@ class AVLTree(BinarySearchTree):
         self.extend(data=data)
 
     class AVLNode(BinaryTree.BTNode):
+        def __init__(self, key=None):
+            super().__init__(key)
+            self.height = 0
+
         def left_rotate(self):
             child = self.r
-            child.detach()
-            if child.l:
-                cl = child.l
-                cl.detach()
-                self.attach(cl, "r")
-            if not self.parent:
-                self.detach()
-                self.tree.root = child
-            else:
-                parent = self.parent
-                side = self.side
-                self.detach()
-                parent.attach(child, side)
-            child.attach(self, "l")
+            self.r = child.l
+            child.l = self
+            self.height = self.get_height()
             child.height = child.get_height()
-            child.recalc_parent_heights()
+            return child
 
         def right_rotate(self):
             child = self.l
-            child.detach()
-            if child.r:
-                cr = child.r
-                cr.detach()
-                self.attach(cr, "l")
-            if not self.parent:
-                self.detach()
-                self.tree.root = child
-            else:
-                parent = self.parent
-                side = self.side
-                self.detach()
-                parent.attach(child, side)
-            child.attach(self, "r")
+            self.l = child.r
+            child.r = self
+            self.height = self.get_height()
             child.height = child.get_height()
-            child.recalc_parent_heights()
+            return child
 
         def left_right_rotate(self):
-            self.l.left_rotate()
-            self.right_rotate()
+            self.l = self.l.left_rotate()
+            return self.right_rotate()
 
         def right_left_rotate(self):
-            self.r.right_rotate()
-            self.left_rotate()
+            self.r = self.r.right_rotate()
+            return self.left_rotate()
+
+        def balance(self):
+            bal_fac = self.get_balance_factor()
+            if bal_fac > 1:
+                if self.l.get_balance_factor() >= 0:
+                    return self.right_rotate()
+                else:
+                    return self.left_right_rotate()
+            if bal_fac < -1:
+                if self.r.get_balance_factor() <= 0:
+                    return self.left_rotate()
+                else:
+                    return self.right_left_rotate()
+            return self
+
+        def set_height(self):
+            self.height = self.get_height()
+
+        def get_height(self):
+            lh = self.l.height if self.l else -1
+            rh = self.r.height if self.r else -1
+            return 1 + max(lh, rh)
 
         def get_balance_factor(self):
             lh = self.l.height if self.l else -1
             rh = self.r.height if self.r else -1
             return lh - rh
 
-        def add_l(self, key):
-            """
-            Manually insert a node to the left of self.
+        def add_node(self, key, side):
+            if side == "l":
+                self.l = AVLTree.AVLNode(key)
+            if side == "r":
+                self.r = AVLTree.AVLNode(key)
+            self.set_height()
 
-            This convenience method is primarily for testing. You generally won't
-            be adding elements to a binary tree by hand.
-            """
-            self.l = AVLTree.AVLNode(
-                key, depth=self.depth + 1, side="l", parent=self, tree=self.tree
-            )
-            return self.l
+        def attach_node(self, node, side):
+            super().attach_node(node, side)
+            self.set_height()
 
-        def add_r(self, key):
-            """
-            Manually insert a node to the right of self.
-
-            This convenience method is primarily for testing. You generally won't
-            be adding elements to a binary tree by hand.
-            """
-            self.r = AVLTree.AVLNode(
-                key, depth=self.depth + 1, side="r", parent=self, tree=self.tree
-            )
-            return self.r
-
-    def add_avl(self, key):
-        node = self.add_bst(key)
-
-        def balance(node, key):
-            bal_fac = node.get_balance_factor()
-            if bal_fac > 1:
-                if key < node.l.key:
-                    node.right_rotate()
-                else:
-                    node.left_right_rotate()
-            if bal_fac < -1:
-                if key > node.r.key:
-                    node.left_rotate()
-                else:
-                    node.right_left_rotate()
-            node.recalc_parent_heights()
-            if node.parent:
-                balance(node.parent, key)
-
-        balance(node, key)
-
-    def delete_avl(self, key):
-        node = self.delete_bst(key)
-
-        def balance(node):
-            bal_fac = node.get_balance_factor()
-            if bal_fac > 1:
-                if node.l.get_balance_factor() >= 0:
-                    node.right_rotate()
-                else:
-                    node.left_right_rotate()
-            if bal_fac < -1:
-                if node.r.get_balance_factor() <= 0:
-                    node.left_rotate()
-                else:
-                    node.right_left_rotate()
-            node.height = node.get_height()
-            node.recalc_parent_heights()
-            if node.parent:
-                balance(node.parent)
-
-        balance(node)
+        def del_node(self, side):
+            super().del_node(side)
+            self.set_height()
 
     def add_root(self, key):
-        self.root = AVLTree.AVLNode(key=key, tree=self)
-        return self.root
+        self.root = AVLTree.AVLNode(key)
+
+    def add_avl(self, key):
+        def rec_add(node, key):
+            if key == node.key:
+                raise Exception("Duplicates not allowed in binary search tree")
+            if key < node.key:
+                if node.l:
+                    node.attach_node(rec_add(node.l, key), "l")
+                else:
+                    node.add_node(key, "l")
+            if key > node.key:
+                if node.r:
+                    node.attach_node(rec_add(node.r, key), "r")
+                else:
+                    node.add_node(key, "r")
+            return node.balance()
+
+        if not self.root:
+            self.add_root(key)
+        else:
+            self.root = rec_add(self.root, key).balance()
+
+    def delete_avl(self, key):
+        def rec_del(node):
+            if key == node.key:
+                return get_replacement(node)
+            elif node.l and key < node.key:
+                node.attach_node(rec_del(node.l), "l")
+            elif node.r and key > node.key:
+                node.attach_node(rec_del(node.r), "r")
+            else:
+                raise Exception("Attempted to delete missing key from tree:", key)
+            return node.balance()
+
+        def get_replacement(node):
+            # Determine which children are present
+            kids = ""
+            if node.l:
+                kids += "l"
+            if node.r:
+                kids += "r"
+            # No children
+            if kids == "":
+                return None
+            # One child
+            if kids == "l":
+                return node.l
+            if kids == "r":
+                return node.r
+            # Two children -> Find successor
+            # Successor is node.r
+            if not node.r.l:
+                node.r.attach_node(node.l, "l")
+                return node.r.balance()
+            # Successor is not node.r
+            link, successor = get_successor(node.r)
+            successor.attach_node(node.l, "l")
+            successor.attach_node(link, "r")
+            return successor.balance()
+
+        def get_successor(parent):
+            successor = parent.l
+            if successor.l:
+                link, got = get_successor(successor)
+                parent.attach_node(link, "l")
+                return (parent.balance(), got)
+            else:
+                parent.attach_node(successor.r, "l")
+                return (parent.balance(), successor)
+
+        self.root = rec_del(self.root)
 
 
 def bt_example(i):
@@ -1246,4 +1272,5 @@ if __name__ == "__main__":
     # import doctest
 
     # doctest.testmod()
-    bst = BinarySearchTree(data=[x for x in range(63)])
+    avl = AVLTree(data=[x for x in range(15)])
+    avl.display()

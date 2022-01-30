@@ -219,18 +219,7 @@ def bst_get():
     test(bst.get(0).key, 0)
 
 
-def avlnode_left_rotate():
-    avl = get_avl(7)
-    avl.delete(0)
-    avl.delete(2)
-    avl.get(3).left_rotate()
-    test(avl.inspect(), expect["avl"]["5lri"])
-
-
-def avlnode_right_rotate():
-    avl = get_avl(7)
-    avl.root.right_rotate()
-    test(avl.inspect(), expect["avl"]["7rri"])
+# Binary Search Tree
 
 
 def avl_add():
@@ -246,11 +235,11 @@ def avl_delete():
     avl = get_avl(0)
     numbers = [x for x in range(1000)]
     contents = []
-    for x in range(80):
+    for x in range(200):
         y = numbers.pop(random.randint(0, len(numbers) - 1))
         avl.add(y)
         contents.append(y)
-    for x in range(78):
+    for x in range(198):
         y = contents.pop(random.randint(0, len(contents) - 1))
         avl.delete(y)
         test(avl.is_balanced(), True)
@@ -283,10 +272,6 @@ def suites():
             ("Get", bst_get),
         ],
         "AVLTree": [("Add", avl_add), ("Delete", avl_delete)],
-        "AVLNode": [
-            ("Left rotate", avlnode_left_rotate),
-            ("Right rotate", avlnode_right_rotate),
-        ],
     }
 
 
