@@ -178,10 +178,14 @@ class CircularQueue:
         return self.head == -1
 
     def is_full(self):
-        return (self.head - self.tail) % self.size == 1
+        output = (self.head - self.tail) % self.size == 1
+        print("Is_full", self.head, self.tail, self.size, output)
+        return output
 
     def enqueue(self, x):
+        print("Enqueueing", self, self.head, self.tail, x)
         if self.is_full():
+            print("Full", self, self.head, self.tail)
             self.handle_full()
         if self.head == -1:
             self.head = self.tail = 0
@@ -217,7 +221,7 @@ class CircularQueue:
     def __iter__(self):
         i = self.head
         for x in range(self.size):
-            if self.data[i]:
+            if self.data[i] is not None:
                 yield self.data[i]
             i = (i + 1) % self.size
 
@@ -492,7 +496,7 @@ class BinaryTree:
 
         """
         if not self.root:
-            self.root = self.BTNode(key)
+            self.add_root(key)
             return self.root
         for node in self.breadth_first():
             if not node.l:
@@ -1272,5 +1276,9 @@ if __name__ == "__main__":
     # import doctest
 
     # doctest.testmod()
-    avl = AVLTree(data=[x for x in range(15)])
-    avl.display()
+    queue = CircularQueue(size=5)
+    for x in range(3):
+        for y in range(3):
+            queue.enqueue(y)
+        for y in range(3):
+            queue.dequeue()
