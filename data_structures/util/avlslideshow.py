@@ -1,4 +1,5 @@
-import ds
+from ../data_structures/avl_tree import AVLTree
+from ../data_structures/dynamic_circular_queue import DCQueue
 import os
 import util
 import random
@@ -24,10 +25,10 @@ class style:
     END = "\033[0m"
 
 
-class AVL_Slideshow(ds.AVLTree):
+class AVL_Slideshow(AVLTree):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.slides = ds.DCQueue()
+        self.slides = DCQueue()
         self.add = self.add_slideshow
         self.delete = self.delete_slideshow
 
