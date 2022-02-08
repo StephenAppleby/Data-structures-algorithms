@@ -1,7 +1,7 @@
-from dynamic_circular_queue import CircularQueue
+from .cqueue import CircularQueue
 
 
-class DCQueue(CircularQueue):
+class DynamicCircularQueue(CircularQueue):
     """Dynamic implementation of CircularQueue.
 
     >>> dcqueue = DCQueue(size=3)
@@ -13,12 +13,19 @@ class DCQueue(CircularQueue):
     [3, 0, 1, 2, 3, None]
     """
 
-    def handle_full(self):
+    def __init__(self, data=[]):
+        super().__init__(data=data, max_size=8)
+
+    def handle_full(self, x):
         old_data = []
         while len(self) > 0:
             old_data.append(self.dequeue())
-        self.size *= 2
-        self.data = [None] * self.size
+        self.max_size *= 2
+        self.data = [None] * self.max_size
         self.head = self.tail = -1
         for d in old_data:
             self.enqueue(d)
+
+    def initialise_empty(self):
+        self.data = [None] * 8
+        self.head = self.tail = -1

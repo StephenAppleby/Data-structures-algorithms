@@ -39,47 +39,54 @@ class CircularQueue:
     16
     """
 
-    def __init__(self, size=10):
-        self.size = size
-        self.data = [None] * size
-        self.head = self.tail = -1
+    def __init__(self, data=[], max_size=8):
+        self.max_size = max_size
+        self.initialise_empty()
+        self.extend(data)
+
+    def is_full(self):
+        return (self.tail + 1) % self.max_size == self.head
 
     def is_empty(self):
         return self.head == -1
 
-    def is_full(self):
-        output = (self.head - self.tail) % self.size == 1
-        print("Is_full", self.head, self.tail, self.size, output)
-        return output
+    def handle_full(self, x):
+        raise Exception("Queue full, cannot enqueue", x)
+
+    def handle_empty(self):
+        self.head = self.tail = -1
+
+    def initialise_empty(self):
+        self.data = [None] * self.max_size
+        self.head = self.tail = -1
 
     def enqueue(self, x):
-        print("Enqueueing", self, self.head, self.tail, x)
         if self.is_full():
-            print("Full", self, self.head, self.tail)
-            self.handle_full()
-        if self.head == -1:
+            self.handle_full(x)
+        if self.tail == -1:
             self.head = self.tail = 0
-            self.data[self.tail] = x
         else:
-            self.tail = (self.tail + 1) % self.size
-            self.data[self.tail] = x
-
-    def handle_full(self):
-        raise Exception("Queue full, cannot enqueue")
+            self.tail = (self.tail + 1) % self.max_size
+        self.data[self.tail] = x
 
     def dequeue(self):
         if self.is_empty():
             raise Exception("Queue empty, cannot dequeue")
         output = self.data[self.head]
         self.data[self.head] = None
-        self.head = (self.head + 1) % self.size
+        if self.head == self.tail:
+            self.initialise_empty()
+        else:
+            self.head = (self.head + 1) % self.max_size
         return output
 
     def peek(self):
+        if self.is_empty():
+            raise Exception("Queue empty, cannot peek")
         return self.data[self.head]
 
-    def extend(self, arr):
-        for x in arr:
+    def extend(self, data):
+        for x in data:
             self.enqueue(x)
 
     def __str__(self):
@@ -90,7 +97,7 @@ class CircularQueue:
 
     def __iter__(self):
         i = self.head
-        for x in range(self.size):
+        for x in range(self.max_size):
             if self.data[i] is not None:
                 yield self.data[i]
-            i = (i + 1) % self.size
+            i = (i + 1) % self.max_size
