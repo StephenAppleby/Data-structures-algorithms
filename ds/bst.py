@@ -1,6 +1,5 @@
-import util
 from math import ceil
-from binary_tree import BinaryTree
+from .bt import BinaryTree
 
 
 class BinarySearchTree(BinaryTree):

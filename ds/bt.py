@@ -1,4 +1,5 @@
-import util
+from .util import util
+from .dcqueue import DynamicCircularQueue
 
 
 class BinaryTree:
@@ -14,13 +15,16 @@ class BinaryTree:
 
     """
 
-    def __init__(self, root=None, data=[]):
+    def __init__(self, root=None, data=[], preset=None):
         self.root = root
         self.add = self.add_breadth_first
         self.extend = self.extend_default
         self.delete = self.delete_default
         self.get = self.get_default
-        self.extend(data)
+        if preset is not None:
+            self.extend([x for x in range(preset)])
+        else:
+            self.extend(data)
 
     class BTNode:
         """
@@ -475,12 +479,6 @@ class BinaryTree:
                 return False
         return True
 
-    def display(self):
-        print(util.display(self))
-
-    def inspect(self):
-        return util.inspect(self)
-
     def breadth_first(self):
         """
         Returns a left -> right, top -> bottom iterator.
@@ -501,7 +499,7 @@ class BinaryTree:
         """
         if self.root:
             yield self.root
-            queue = DCQueue()
+            queue = DynamicCircularQueue()
             if self.root.l:
                 queue.enqueue(self.root.l)
             if self.root.r:
@@ -598,5 +596,11 @@ class BinaryTree:
             for n in rec_postorder(self.root):
                 yield n
 
-    def get_tree(self, **kwargs):
-        return BinaryTree(**kwargs)
+    def display(self):
+        print(util.display(self))
+
+    def __str__(self):
+        return util.display(self)
+
+    def inspect(self):
+        return util.inspect(self)
