@@ -233,4 +233,4 @@ class BinarySearchTree(BinaryTree):
         Returns True if self satisfies the definition of a binary search tree.
         """
         nodes = list(self.flatten())
-        return all(nodes[i] <= nodes[i + 1] for i in range(len(nodes) - 1))
+        return all(nodes[i].key < nodes[i + 1].key for i in range(len(nodes) - 1))

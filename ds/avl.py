@@ -1,8 +1,8 @@
-import util
-import bst
+from .bt import BinaryTree
+from .bst import BinarySearchTree
 
 
-class AVLTree(bst.BinarySearchTree):
+class AVLTree(BinarySearchTree):
     def __init__(self, **kwargs):
         data = []
         if "data" in kwargs:

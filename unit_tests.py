@@ -1,7 +1,8 @@
 import sys
+import random
 import unittest
-from pathlib import Path
 
+from test_expectations import expectations
 import ds
 from ds.stack import Stack
 from ds.queue import Queue
@@ -9,6 +10,7 @@ from ds.cqueue import CircularQueue
 from ds.dcqueue import DynamicCircularQueue
 from ds.bt import BinaryTree
 from ds.bst import BinarySearchTree
+from ds.avl import AVLTree
 
 
 class TestStack(unittest.TestCase):
@@ -144,20 +146,12 @@ class TestDCQueue(unittest.TestCase):
 
 class TestBT(unittest.TestCase):
     def test_init(self):
-        tree = BinaryTree(preset=7)
-        self.assertEqual(
-            str(tree),
-            """\
-       0
-   ┌───┴───┐
-   1       2
- ┌─┴─┐   ┌─┴─┐
- 3   4   5   6""",
-        )
+        tree = BinaryTree().preset(7)
+        self.assertEqual(str(tree), expectations["bt_preset7"])
 
     def test_is_perfect(self):
-        check_true = lambda x: self.assertTrue(BinaryTree(preset=x).is_perfect())
-        check_false = lambda x: self.assertFalse(BinaryTree(preset=x).is_perfect())
+        check_true = lambda x: self.assertTrue(BinaryTree().preset(x).is_perfect())
+        check_false = lambda x: self.assertFalse(BinaryTree().preset(x).is_perfect())
         check_true(1)
         check_false(2)
         check_true(3)
@@ -167,8 +161,8 @@ class TestBT(unittest.TestCase):
         check_true(7)
 
     def test_is_full(self):
-        check_true = lambda x: self.assertTrue(BinaryTree(preset=x).is_full())
-        check_false = lambda x: self.assertFalse(BinaryTree(preset=x).is_full())
+        check_true = lambda x: self.assertTrue(BinaryTree().preset(x).is_full())
+        check_false = lambda x: self.assertFalse(BinaryTree().preset(x).is_full())
         check_true(1)
         check_false(2)
         check_true(3)
@@ -181,10 +175,10 @@ class TestBT(unittest.TestCase):
 
     def test_is_complete(self):
         for x in range(1, 15):
-            self.assertTrue(BinaryTree(preset=x).is_complete())
+            self.assertTrue(BinaryTree().preset(x).is_complete())
 
     def test_is_balanced(self):
-        tree = BinaryTree(preset=4)
+        tree = BinaryTree().preset(4)
         self.assertTrue(tree.is_balanced())
         tree.add(4)
         self.assertTrue(tree.is_balanced())
@@ -197,158 +191,118 @@ class TestBT(unittest.TestCase):
         self.assertTrue(tree.is_balanced())
 
     def test_breadth_first(self):
-        nodes = list(BinaryTree(preset=7).breadth_first())
+        nodes = list(BinaryTree().preset(7).breadth_first())
         keys = [node.key for node in nodes]
         self.assertEqual(keys, [0, 1, 2, 3, 4, 5, 6])
 
     def test_flatten(self):
-        nodes = list(BinaryTree(preset=7).flatten())
+        nodes = list(BinaryTree().preset(7).flatten())
         keys = [node.key for node in nodes]
         self.assertEqual(keys, [3, 1, 4, 0, 5, 2, 6])
 
     def test_preorder(self):
-        nodes = list(BinaryTree(preset=7).preorder())
+        nodes = list(BinaryTree().preset(7).preorder())
         keys = [node.key for node in nodes]
         self.assertEqual(keys, [0, 1, 3, 4, 2, 5, 6])
 
     def test_postorder(self):
-        nodes = list(BinaryTree(preset=7).postorder())
+        nodes = list(BinaryTree().preset(7).postorder())
         keys = [node.key for node in nodes]
         self.assertEqual(keys, [3, 4, 1, 5, 6, 2, 0])
 
 
 class TestBST(unittest.TestCase):
     def test_init(self):
-        bst = BinarySearchTree(preset=7)
-        self.assertEqual(
-            str(bst),
-            """\
-       3
-   ┌───┴───┐
-   1       5
- ┌─┴─┐   ┌─┴─┐
- 0   2   4   6""",
-        )
+        bst = BinarySearchTree().preset(7)
+        self.assertEqual(str(bst), expectations["bst_preset7"])
 
     def test_add_bst(self):
         bst = BinarySearchTree(data=[x * 10 for x in range(5)])
-        self.assertEqual(
-            str(bst),
-            """\
-      20
-   ┌───┴───┐
-  10      40
- ┌─┘     ┌─┘
- 0      30""",
-        )
+        self.assertEqual(str(bst), expectations["bst_add_A"])
         bst.add(15)
         bst.add(60)
-        self.assertEqual(
-            str(bst),
-            """\
-      20
-   ┌───┴───┐
-  10      40
- ┌─┴─┐   ┌─┴─┐
- 0  15  30  60""",
-        )
+        self.assertEqual(str(bst), expectations["bst_add_B"])
         bst.add(80)
         bst.add(8)
-        self.assertEqual(
-            str(bst),
-            """\
-              20
-       ┌───────┴───────┐
-      10              40
-   ┌───┴───┐       ┌───┴───┐
-   0      15      30      60
-   └─┐                     └─┐
-     8                      80""",
-        )
+        self.assertEqual(str(bst), expectations["bst_add_C"])
 
     def test_balance(self):
-        bst = BinarySearchTree(preset=7)
+        bst = BinarySearchTree().preset(7)
         bst.add(7)
         bst.add(8)
         bst.balance()
-        self.assertEqual(
-            str(bst),
-            """\
-               4
-       ┌───────┴───────┐
-       2               7
-   ┌───┴───┐       ┌───┴───┐
-   1       3       6       8
- ┌─┘             ┌─┘
- 0               5""",
-        )
+        self.assertEqual(str(bst), expectations["bst_balance_A"])
         bst.balance([10, 20, 30, 40])
-        self.assertEqual(
-            str(bst),
-            """\
-               6
-       ┌───────┴───────┐
-       3              20
-   ┌───┴───┐       ┌───┴───┐
-   1       5       8      40
- ┌─┴─┐   ┌─┘     ┌─┴─┐   ┌─┘
- 0   2   4       7  10  30""",
-        )
+        self.assertEqual(str(bst), expectations["bst_balance_B"])
 
     def test_delete(self):
-        bst = BinarySearchTree(preset=15)
+        bst = BinarySearchTree().preset(15)
         # Case 1: leaf
         bst.delete(10)
-        self.assertEqual(
-            str(bst),
-            """\
-               7
-       ┌───────┴───────┐
-       3              11
-   ┌───┴───┐       ┌───┴───┐
-   1       5       9      13
- ┌─┴─┐   ┌─┴─┐   ┌─┘     ┌─┴─┐
- 0   2   4   6   8      12  14""",
-        )
+        self.assertEqual(str(bst), expectations["bst_delete_A"])
         # Case 2: One child
         bst.delete(9)
-        self.assertEqual(
-            str(bst),
-            """\
-               7
-       ┌───────┴───────┐
-       3              11
-   ┌───┴───┐       ┌───┴───┐
-   1       5       8      13
- ┌─┴─┐   ┌─┴─┐           ┌─┴─┐
- 0   2   4   6          12  14""",
-        )
+        self.assertEqual(str(bst), expectations["bst_delete_B"])
         # Case 3: Two children with complex successor
         bst.delete(3)
-        self.assertEqual(
-            str(bst),
-            """\
-               7
-       ┌───────┴───────┐
-       4              11
-   ┌───┴───┐       ┌───┴───┐
-   1       5       8      13
- ┌─┴─┐     └─┐           ┌─┴─┐
- 0   2       6          12  14""",
-        )
+        self.assertEqual(str(bst), expectations["bst_delete_C"])
         # Case 4: Two children with simple successor
         bst.delete(4)
-        self.assertEqual(
-            str(bst),
-            """\
-               7
-       ┌───────┴───────┐
-       5              11
-   ┌───┴───┐       ┌───┴───┐
-   1       6       8      13
- ┌─┴─┐                   ┌─┴─┐
- 0   2                  12  14""",
-        )
+        self.assertEqual(str(bst), expectations["bst_delete_D"])
+
+
+class TestAVL(unittest.TestCase):
+    def test_init(self):
+        avl = AVLTree().preset(7)
+        self.assertEqual(str(avl), expectations["bst_preset7"])
+
+    def test_left_rotate(self):
+        avl = AVLTree(data=[0])
+        avl.root.add_node(1, "r")
+        avl.get(1).add_node(2, "r")
+        self.assertEqual(str(avl), expectations["avl_left_rotate"])
+        avl.root = avl.root.left_rotate()
+        self.assertEqual(str(avl), expectations["bst_preset3"])
+
+    def test_right_rotate(self):
+        avl = AVLTree(data=[2])
+        avl.root.add_node(1, "l")
+        avl.get(1).add_node(0, "l")
+        self.assertEqual(str(avl), expectations["avl_right_rotate"])
+        avl.root = avl.root.right_rotate()
+        self.assertEqual(str(avl), expectations["bst_preset3"])
+
+    def test_left_right_rotate(self):
+        avl = AVLTree(data=[2])
+        avl.root.add_node(0, "l")
+        avl.get(0).add_node(1, "r")
+        self.assertEqual(str(avl), expectations["avl_left_right_rotate"])
+        avl.root = avl.root.left_right_rotate()
+        self.assertEqual(str(avl), expectations["bst_preset3"])
+
+    def test_right_left_rotate(self):
+        avl = AVLTree(data=[0])
+        avl.root.add_node(2, "r")
+        avl.get(2).add_node(1, "l")
+        self.assertEqual(str(avl), expectations["avl_right_left_rotate"])
+        avl.root = avl.root.right_left_rotate()
+        self.assertEqual(str(avl), expectations["bst_preset3"])
+
+    def test_integration(self):
+        avl = AVLTree()
+        candidates = [x for x in range(1000)]
+        contents = []
+        for x in range(200):
+            y = candidates.pop(random.randint(0, len(candidates) - 1))
+            avl.add(y)
+            contents.append(y)
+            self.assertTrue(avl.is_balanced())
+            self.assertTrue(avl.is_bst())
+        for x in range(200):
+            y = contents.pop(random.randint(0, len(contents) - 1))
+            avl.delete(y)
+            self.assertTrue(avl.is_balanced())
+            self.assertTrue(avl.is_bst())
 
 
 if __name__ == "__main__":

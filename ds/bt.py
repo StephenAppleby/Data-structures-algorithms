@@ -15,16 +15,17 @@ class BinaryTree:
 
     """
 
-    def __init__(self, root=None, data=[], preset=None):
+    def __init__(self, root=None, data=[]):
         self.root = root
         self.add = self.add_breadth_first
         self.extend = self.extend_default
         self.delete = self.delete_default
         self.get = self.get_default
-        if preset is not None:
-            self.extend([x for x in range(preset)])
-        else:
-            self.extend(data)
+        self.extend(data)
+
+    def preset(self, n):
+        self.extend([x for x in range(n)])
+        return self
 
     class BTNode:
         """
@@ -471,7 +472,7 @@ class BinaryTree:
         False
         """
         if not self.root:
-            return
+            return True
         for node in self.flatten():
             rh = node.r.get_height() if node.r else -1
             lh = node.l.get_height() if node.l else -1
