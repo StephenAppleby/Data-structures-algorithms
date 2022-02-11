@@ -140,6 +140,12 @@ class BinaryTree:
         def inspect(self):
             return util.inspect_node(self)
 
+        def __lt__(self, other):
+            return self.key < other.key
+
+        def __eq__(self, other):
+            return self.key == other.key
+
     def add_root(self, key):
         self.root = BinaryTree.BTNode(key)
 

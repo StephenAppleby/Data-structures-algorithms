@@ -11,6 +11,7 @@ from ds.dcqueue import DynamicCircularQueue
 from ds.bt import BinaryTree
 from ds.bst import BinarySearchTree
 from ds.avl import AVLTree
+from ds.heap import Heap
 
 
 class TestStack(unittest.TestCase):
@@ -303,6 +304,23 @@ class TestAVL(unittest.TestCase):
             avl.delete(y)
             self.assertTrue(avl.is_balanced())
             self.assertTrue(avl.is_bst())
+
+
+class TestHeap(unittest.TestCase):
+    def test_init(self):
+        heap = Heap()
+
+    def test_integration(self):
+        repetitions = 30
+        heap_size = 20
+        for x in range(repetitions):
+            candidates = [i for i in range(1000)]
+            contents = []
+            for y in range(heap_size):
+                contents.append(candidates.pop(random.randint(0, len(candidates) - 1)))
+            heap = Heap(data=contents)
+            self.assertTrue(heap.is_complete())
+            self.assertTrue(heap.is_heap())
 
 
 if __name__ == "__main__":

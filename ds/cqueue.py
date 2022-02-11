@@ -93,11 +93,13 @@ class CircularQueue:
         return str(self.data)
 
     def __len__(self):
-        return len([x for x in self if x != None])
+        if self.head == -1:
+            return 0
+        return ((self.tail - self.head) % self.max_size) + 1
 
     def __iter__(self):
-        i = self.head
-        for x in range(self.max_size):
-            if self.data[i] is not None:
+        if self.head != -1:
+            i = self.head
+            while i != self.tail:
                 yield self.data[i]
-            i = (i + 1) % self.max_size
+                i = (i + 1) % self.max_size
