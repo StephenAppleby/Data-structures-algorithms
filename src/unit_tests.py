@@ -11,6 +11,7 @@ from ds.bt import BinaryTree
 from ds.bst import BinarySearchTree
 from ds.avl import AVLTree
 from ds.btheap import BTHeap
+from ds.heap import Heap
 
 
 class TestStack(unittest.TestCase):
@@ -344,6 +345,19 @@ class TestBTHeap(unittest.TestCase):
         for x in range(repetitions):
             heap.add(candidates.pop(random.randint(0, len(candidates) - 1)))
             self.assertTrue(heap.is_complete())
+            self.assertTrue(heap.is_heap())
+
+
+class TestHeap(unittest.TestCase):
+    def test_heapify(self):
+        repetitions = 400
+        heap_size = 70
+        for x in range(repetitions):
+            candidates = [i for i in range(1000)]
+            contents = []
+            for y in range(heap_size):
+                contents.append(candidates.pop(random.randint(0, len(candidates) - 1)))
+            heap = Heap(data=contents)
             self.assertTrue(heap.is_heap())
 
 
