@@ -1,4 +1,3 @@
-import sys
 import random
 import unittest
 
@@ -11,7 +10,7 @@ from ds.dcqueue import DynamicCircularQueue
 from ds.bt import BinaryTree
 from ds.bst import BinarySearchTree
 from ds.avl import AVLTree
-from ds.heap import Heap
+from ds.btheap import BTHeap
 
 
 class TestStack(unittest.TestCase):
@@ -127,6 +126,14 @@ class TestCQueue(unittest.TestCase):
         cqueue.enqueue(0)
         self.assertEqual(cqueue.data, [0, None, None, None])
 
+    def test_stree(self):
+        cqueue = CircularQueue(max_size=100)
+        for x in range(20):
+            for y in range(100):
+                cqueue.enqueue(y)
+            for z in range(100):
+                cqueue.dequeue()
+
 
 class TestDCQueue(unittest.TestCase):
     def test_handle_full(self):
@@ -143,6 +150,14 @@ class TestDCQueue(unittest.TestCase):
             dcqueue.dequeue()
         self.assertTrue(dcqueue.is_empty())
         self.assertEqual(dcqueue.data, [None] * 8)
+
+    def test_stress(self):
+        dcqueue = DynamicCircularQueue()
+        for x in range(20):
+            for y in range(90):
+                dcqueue.enqueue(y)
+            for z in range(90):
+                dcqueue.dequeue()
 
 
 class TestBT(unittest.TestCase):
@@ -306,19 +321,28 @@ class TestAVL(unittest.TestCase):
             self.assertTrue(avl.is_bst())
 
 
-class TestHeap(unittest.TestCase):
+class TestBTHeap(unittest.TestCase):
     def test_init(self):
-        heap = Heap()
+        heap = BTHeap()
 
-    def test_integration(self):
-        repetitions = 30
-        heap_size = 20
+    def test_heapify(self):
+        repetitions = 40
+        heap_size = 50
         for x in range(repetitions):
             candidates = [i for i in range(1000)]
             contents = []
             for y in range(heap_size):
                 contents.append(candidates.pop(random.randint(0, len(candidates) - 1)))
-            heap = Heap(data=contents)
+            heap = BTHeap(data=contents)
+            self.assertTrue(heap.is_complete())
+            self.assertTrue(heap.is_heap())
+
+    def test_add(self):
+        repetitions = 50
+        heap = BTHeap()
+        candidates = [i for i in range(1000)]
+        for x in range(repetitions):
+            heap.add(candidates.pop(random.randint(0, len(candidates) - 1)))
             self.assertTrue(heap.is_complete())
             self.assertTrue(heap.is_heap())
 

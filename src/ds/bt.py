@@ -260,14 +260,14 @@ class BinaryTree:
         """
         if not self.root:
             self.add_root(key)
-            return self.root
+            return
         for node in self.breadth_first():
             if not node.l:
                 node.add_node(key, "l")
-                return node.l
+                return
             if not node.r:
                 node.add_node(key, "r")
-                return node.r
+                return
 
     def is_perfect(self):
         """

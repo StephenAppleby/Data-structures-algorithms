@@ -97,6 +97,9 @@ class CircularQueue:
             return 0
         return ((self.tail - self.head) % self.max_size) + 1
 
+    def inspect(self):
+        return f"{self.data}, {self.max_size}, {self.head}, {self.tail}"
+
     def __iter__(self):
         if self.head != -1:
             i = self.head

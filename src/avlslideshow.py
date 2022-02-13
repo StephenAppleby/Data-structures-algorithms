@@ -1,7 +1,5 @@
-from ../data_structures/avl_tree import AVLTree
-from ../data_structures/dynamic_circular_queue import DCQueue
+from ds import avl, dcqueue, util
 import os
-import util
 import random
 from time import sleep
 
@@ -25,14 +23,14 @@ class style:
     END = "\033[0m"
 
 
-class AVL_Slideshow(AVLTree):
+class AVL_Slideshow(avl.AVLTree):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.slides = DCQueue()
+        self.slides = dcqueue.DynamicCircularQueue()
         self.add = self.add_slideshow
         self.delete = self.delete_slideshow
 
-    class AVL_Slideshow_Node(ds.AVLTree.AVLNode):
+    class AVL_Slideshow_Node(avl.AVLTree.AVLNode):
         def __init__(self, key=None, tree=None, style=""):
             super().__init__(key)
             self.style = style
@@ -46,7 +44,7 @@ class AVL_Slideshow(AVLTree):
             self.set_height()
 
     def display(self):
-        print(util.display(self, True))
+        print(util.util.display(self, True))
 
     def add_root(self, key, style=""):
         self.root = AVL_Slideshow.AVL_Slideshow_Node(key, self, style=style)
@@ -311,7 +309,7 @@ class AVL_Slideshow(AVLTree):
 if __name__ == "__main__":
     tree = AVL_Slideshow()
     try:
-        tree.play(size=27, initial=14, pause_factor=0.25)
+        tree.play(size=29, initial=14, pause_factor=0.25)
     except Exception:
         print("\n".join(log))
         raise

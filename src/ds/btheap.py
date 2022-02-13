@@ -1,15 +1,20 @@
 from .bt import BinaryTree
 
 
-class Heap(BinaryTree):
+class BTHeap(BinaryTree):
     def __init__(self, max_or_min="max", **kwargs):
-        self.max_or_min = max_or_min
         if max_or_min == "max":
             self.compare = lambda a, b: a > b
         if max_or_min == "min":
             self.compare = lambda a, b: a < b
+        data = []
+        if "data" in kwargs:
+            data = kwargs.pop("data")
         super().__init__(**kwargs)
-        self.heapify()
+        self.add = self.add_heap
+        self.delete = self.delete_heap
+        self.extend = self.extend_heap
+        self.extend(data)
 
     def heapify(self):
         def swap(parent, child, side):
@@ -52,18 +57,25 @@ class Heap(BinaryTree):
                 return node
             # A complete tree will have no nodes with a right child but no left
 
-        self.root = rec_heapify(self.root)
+        if self.root:
+            self.root = rec_heapify(self.root)
+
+    def add_heap(self, key):
+        self.add_breadth_first(key)
+        self.heapify()
+
+    def extend_heap(self, data=[]):
+        for key in data:
+            self.add_breadth_first(key)
+        self.heapify()
+
+    def delete_heap(self, key):
+        pass
 
     def is_heap(self):
         for node in self.preorder():
-            if node.l:
-                if self.max_or_min == "max" and node.key < node.l.key:
-                    return False
-                if self.max_or_min == "min" and node.key > node.l.key:
-                    return False
-            if node.r:
-                if self.max_or_min == "max" and node.key < node.r.key:
-                    return False
-                if self.max_or_min == "min" and node.key > node.r.key:
-                    return False
+            if node.l and not self.compare(node, node.l):
+                return False
+            if node.r and not self.compare(node, node.r):
+                return False
         return True

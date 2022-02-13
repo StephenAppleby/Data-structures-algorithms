@@ -18,14 +18,16 @@ class DynamicCircularQueue(CircularQueue):
 
     def handle_full(self, x):
         old_data = []
+        old_max = self.max_size
         while len(self) > 0:
             old_data.append(self.dequeue())
-        self.max_size *= 2
+        self.max_size = old_max * 2
         self.data = [None] * self.max_size
         self.head = self.tail = -1
         for d in old_data:
             self.enqueue(d)
 
     def initialise_empty(self):
-        self.data = [None] * 8
+        self.max_size = 8
+        self.data = [None] * self.max_size
         self.head = self.tail = -1
