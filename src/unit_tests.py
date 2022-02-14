@@ -350,8 +350,8 @@ class TestBTHeap(unittest.TestCase):
 
 class TestHeap(unittest.TestCase):
     def test_heapify(self):
-        repetitions = 400
-        heap_size = 70
+        repetitions = 100
+        heap_size = 68
         for x in range(repetitions):
             candidates = [i for i in range(1000)]
             contents = []
@@ -359,6 +359,22 @@ class TestHeap(unittest.TestCase):
                 contents.append(candidates.pop(random.randint(0, len(candidates) - 1)))
             heap = Heap(data=contents)
             self.assertTrue(heap.is_heap())
+
+    def test_stress(self):
+        repetitions = 20
+        heap_size = 70
+        for x in range(repetitions):
+            heap = Heap()
+            candidates = [i for i in range(1000)]
+            contents = []
+            for y in range(heap_size):
+                y = candidates.pop(random.randint(0, len(candidates) - 1))
+                contents.append(y)
+                heap.add(y)
+                self.assertTrue(heap.is_heap())
+            for z in range(heap_size):
+                heap.pop()
+                self.assertTrue(heap.is_heap())
 
 
 if __name__ == "__main__":
