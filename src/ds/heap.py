@@ -58,6 +58,9 @@ class Heap:
         self.heapify_node(0, size - 1, recursive="down")
         return output
 
+    def peek(self):
+        return self.data[0]
+
     def is_heap(self):
         size = len(self.data)
         for i in range(size // 2):

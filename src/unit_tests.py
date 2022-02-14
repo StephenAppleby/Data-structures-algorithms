@@ -322,32 +322,6 @@ class TestAVL(unittest.TestCase):
             self.assertTrue(avl.is_bst())
 
 
-class TestBTHeap(unittest.TestCase):
-    def test_init(self):
-        heap = BTHeap()
-
-    def test_heapify(self):
-        repetitions = 40
-        heap_size = 50
-        for x in range(repetitions):
-            candidates = [i for i in range(1000)]
-            contents = []
-            for y in range(heap_size):
-                contents.append(candidates.pop(random.randint(0, len(candidates) - 1)))
-            heap = BTHeap(data=contents)
-            self.assertTrue(heap.is_complete())
-            self.assertTrue(heap.is_heap())
-
-    def test_add(self):
-        repetitions = 50
-        heap = BTHeap()
-        candidates = [i for i in range(1000)]
-        for x in range(repetitions):
-            heap.add(candidates.pop(random.randint(0, len(candidates) - 1)))
-            self.assertTrue(heap.is_complete())
-            self.assertTrue(heap.is_heap())
-
-
 class TestHeap(unittest.TestCase):
     def test_heapify(self):
         repetitions = 100
