@@ -1,21 +1,112 @@
+from __future__ import annotations
 from .util import util
 from .dcqueue import DynamicCircularQueue
 
 
 class BinaryTree:
     """
+    Binary Tree.
 
-    >>> tree = BinaryTree(data=[x for x in range(7)])
-    >>> print(tree)
+    This is a base class for binary tree data structures like the binary search tree.
+
+    It contains the definition of a subclass: BTNode. This represents a node of the
+    tree and contains methods for adding, attaching and deleting children from the
+    node.
+
+    The base class also contains methods for ascertaining properties of the tree like
+    is_perfect, is_full, is_complete and is_balanced. There are also methods for
+    returning iterators over the nodes of the tree in breadth_first, inorder(flatten),
+    preorder and postorder priorities.
+
+    This base class also uses an implementation defined in ./util/util.py for rendering
+    a binary tree to the console
+
+    The binary tree can be rendered to the console with the display() method. The logic
+    for this implementation can be found in ./util/util.py. For example:
+
+    >>> tree = BinaryTree().preset(7)
+    >>> tree.display()
            0
        ┌───┴───┐
        1       2
      ┌─┴─┐   ┌─┴─┐
      3   4   5   6
 
+    ...
+
+    Attributes
+    ---------
+    BTNode : class
+        A subclass defining the node of a binary tree, with key and left and right
+        children.
+    root : BTNode
+        The root node of the tree.
+
+    Methods
+    -------
+    preset(n: int) -> BinaryTree
+        Modify an empty tree to add n nodes in ascending order to the tree. Calling the
+        method on the tree after it has been initialised ensures that if it is being
+        called on a class extending BinaryTree, the correct methods and types are used
+        to construct the tree.
+    add_root(key: int)
+        Add a node with key as the root of the tree.
+    extend_default(data: list[int] = [])
+        The default method of extending a tree with a list of keys is to call add(key)
+        for each key in the list.
+    get_default(key: int) -> BTNode
+        The default get behaviour searches the tree with preorder priority and returns
+        the node if present. Raises a KeyError if node absent.
+    delete_default(key: int)
+        The default delete behavior searches the tree for key with preorder priority
+        and removes it from it's parent. Note that this will delete the subtree
+        as well.
+    add_breadth_first(key: int)
+        This is the default add method for the base class. It creates a new node in
+        the place of the first missing space when traversed breadth-first.
+    is_perfect() -> bool
+        A binary tree is perfect if every internal node has two children and all the
+        leaf nodes are on the same level.
+    is_full() -> bool
+        A binary tree is full if every node has either 0 or 2 children.
+    is_complete() -> bool
+        A binary tree is complete if every space in every level of the tree is filled,
+        except possibly the lowest level which must be filled from the left.
+    is_balanced() -> bool
+        A binary tree is balanced if the difference between the height of the children
+        of each node is no greater than 1 and no less than -1.
+    breadth_first() -> Iterator[BTNode]
+        Returns an iterator which provides all the nodes in the tree from top to
+        bottom, left to right.
+    flatten() -> Iterator[BTNode]
+        Returns an iterator which provides all the nodes in the tree in in-order
+        priority.
+    preorder() -> Iterator[BTNode]
+        Returns an iterator which provides all the nodes in the tree in preorder
+        priority.
+    postorder() -> Iterator[BTNode]
+        Returns an iterator which provides all the nodes in the tree in postorder
+        priority.
+    display()
+        Prints a visual representation of the tree to the console. Reccommended for
+        use with trees no greater than 31 nodes, depending on the width of the console.
+    str() -> str
+        Returns a string representation of the tree.
+    inspect() -> str
+        For testing and internal use. Returns a formatted list of the contents of the
+        tree.
     """
 
-    def __init__(self, root=None, data=[]):
+    def __init__(self, root: BTNode = None, data: list[int] = []):
+        """__init__.
+
+        Parameters
+        ----------
+        root : BTNode
+            Optional root node to initialise the tree with.
+        data : list[int]
+            Initial data to input into the tree.
+        """
         self.root = root
         self.add = self.add_breadth_first
         self.extend = self.extend_default
@@ -23,104 +114,138 @@ class BinaryTree:
         self.get = self.get_default
         self.extend(data)
 
-    def preset(self, n):
+    def preset(self, n: int) -> BinaryTree:
+        """
+        Preset.
+
+        Adds n elements of values 0 - n to the tree. Useful for examples and testing.
+
+        Parameters
+        ----------
+        n : int
+            Nodes to add
+
+        Returns
+        -------
+        BinaryTree
+            Self
+        """
         self.extend([x for x in range(n)])
         return self
 
     class BTNode:
         """
-        Recursive binary tree base class.
+        BTNode.
 
-        This base class implements a breadth first add method which adds the new
-        node at the first location in left -> right, top -> bottom order. This
-        leads to the simple creation of perfect trees. Classes which extend this
-        base class will define their own add methods. The extend method uses the
-        class specific add method to add multiple nodes at once.
+        Represents a node in a binary tree.
 
-        The default deletion method assigns the node it is called on to None. This
-        ensures that the parent of the child deleted has None as a child instead of
-        removing it's child attribute, which would happen with del self. Classes
-        that extend BTNode will implement their own deletion methods
-        as appropriate.
+        ...
 
-        Basic usage:
-        >>> tree = bt_example(0)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> tree.root.r.delete()
-        >>> print(tree)
-               0
-           ┌───┘
-           1
-         ┌─┴─┐
-         3   4
-        >>> tree.add(2)
-        1
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐
-         3   4
-        >>> tree.extend([5, 6])
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
+        Attributes
+        ---------
+        key : int
+            Key
+        l : BTNode
+            Left child
+        r : BTNode
+            Right child
+
+        Methods
+        -------
+        add_node(key: int, side: str)
+            Create new child with key at side where side is either \"l\" for left or
+            \"r\" for right. This can be used to override existing child.
+        attach_node(node: BTNode, side: str)
+            Attach existing node to side where side is either \"l\" for left or \"r\"
+            for right. This can be used to override existing child.
+        del_node(side: str)
+            Remove the child on side where side is either \"l\" for left or \"r\" for
+            right.
+        get_height() -> int
+            Returns the height of the node where height is the largest distance to a
+            child leaf node.
+        inspect() -> str
+            Returns a formatted string representing the node and its attributes. Used
+            for internal purposes and testing.
         """
 
-        def __init__(self, key=None):
+        def __init__(self, key: int = None):
+            """__init__.
+
+            Parameters
+            ----------
+            key : int
+                Key
+            """
             self.l = self.r = None
             self.key = key
 
-        def add_node(self, key, side):
+        def add_node(self, key: int, side: str):
+            """
+            Add node.
+
+            Create new child with key at side where side is either \"l\" for left or
+            \"r\" for right. This can be used to override existing child.
+
+            Parameters
+            ----------
+            key : int
+                Node key
+            side : str
+                Side to insert node.
+            """
+
             if side == "l":
                 self.l = BinaryTree.BTNode(key)
             if side == "r":
                 self.r = BinaryTree.BTNode(key)
 
-        def attach_node(self, node, side):
+        def attach_node(self, node: BTNode, side: str):
+            """
+            Attach node.
+
+            Attach existing node to side where side is either \"l\" for left or \"r\"
+            for right. This can be used to override existing child.
+
+            Parameters
+            ----------
+            node : BTNode
+                Node to be attached.
+            side : str
+                Side to attach to.
+            """
             if side == "l":
                 self.l = node
             if side == "r":
                 self.r = node
 
-        def del_node(self, side):
+        def del_node(self, side: str):
+            """
+            Delete node.
+
+            Remove the child on side where side is either \"l\" for left or \"r\" for
+            right.
+
+            Parameters
+            ----------
+            side : str
+                Side to remove.
+            """
             if side == "l":
                 self.l = None
             if side == "r":
                 self.r = None
 
-        def get_height(self):
+        def get_height(self) -> int:
             """
-            Returns maximum distance from self to a leaf (external) node.
+            Get height of node.
 
-            Visits every child node recursively to find the maximum distance. This
-            approach calculates the height when needed instead of storing the
-            height of a node as an attribute. This is because the height of a node
-            can change dynamically when children are added or deleted. While this
-            could be handled and height keys recalculated every time a node is
-            inserted or deleted, this approach seems simpler.
 
-            >>> tree = bt_example(2)
-            >>> print(tree)
-                   0
-               ┌───┴───┐
-               1       2
-             ┌─┴─┐
-             3   4
-            >>> tree.get_height()
-            2
-            >>> tree.r.get_height()
-            0
-            >>> tree.l.get_height()
-            1
+            Returns
+            -------
+            int
+                Returns the height of the node where height is the largest distance
+                to a child leaf node.
             """
             if not self.l and not self.r:
                 return 0
@@ -131,60 +256,67 @@ class BinaryTree:
                 rh = self.r.get_height()
             return max(lh, rh) + 1
 
-        def get_child(self, side):
-            if side == "l":
-                return self.l
-            if side == "r":
-                return self.r
+        def inspect(self) -> str:
+            """
+            Inspect node attributes.
 
-        def inspect(self):
+            Code implementation available at ./util/util.py
+
+            Returns
+            -------
+            str
+                Returns a formatted string representing the node and its attributes.
+                Used for internal purposes and testing.
+            """
             return util.inspect_node(self)
 
-        def __lt__(self, other):
-            return self.key < other.key
+    def add_root(self, key: int):
+        """
+        Add node at root of tree.
 
-        def __eq__(self, other):
-            return self.key == other.key
-
-    def add_root(self, key):
+        Parameters
+        ----------
+        key : int
+            Key of root node to be created.
+        """
         self.root = BinaryTree.BTNode(key)
 
-    def extend_default(self, data=[]):
+    def extend_default(self, data: list[int] = []):
         """
-        Add each key in keys to the tree in sequence.
+        Extend tree.
 
-        This method utilises the .add method, meaning that as long as the
-        binary tree class which is inheriting this base class has properly
-        initialised it's own .add method, .extend will work in every case.
+        The default method of extending a tree with a list of keys is to call add(key)
+        for each key in the list.
 
-        Example using the default breadth-first add method:
-        >>> tree = BinaryTree.BTNode(0)
-        >>> tree.extend([x for x in range(1, 7)])
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
+        Parameters
+        ----------
+        data : list[int] = []
+            List of keys to extend the tree with.
         """
         for k in data:
             self.add(k)
 
-    def get_default(self, key):
+    def get_default(self, key: int) -> BTNode:
         """
-        Default search method.
+        Get a node by key.
 
-        >>> tree = bt_example(0)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> print(tree.get(1))
-           1
-         ┌─┴─┐
-         3   4
+        The default get behaviour searches the tree with preorder priority and returns
+        the node if present. Raises a KeyError if node absent.
+
+        Parameters
+        ----------
+        key : int
+            Key to search for
+
+        Returns
+        -------
+        BTNode
+            Node to be returned if found.
+
+        Raises
+        ------
+        KeyError
+            If there are no nodes with the key present in the tree.
         """
         found = None
         for node in self.preorder():
@@ -194,24 +326,28 @@ class BinaryTree:
             raise KeyError(f"{key} not in tree")
         return found
 
-    def delete_default(self, key):
+    def delete_default(self, key: int):
         """
-        Remove a node from the tree.
+        Delete a node from the tree.
 
-        Removes the node from memory by changing it's parent's reference to it
-        to None. This ensures that the parent maintains it's l or r attribute
-        which can be tested for truthyness.
+        The default delete behavior searches the tree for key with preorder priority
+        and removes it from it's parent. Note that this will delete the whole subtree.
+
+        Parameters
+        ----------
+        key : int
+            Key of node to be deleted.
         """
 
         def delete(node, key):
             if node.l:
                 if node.l.key == key:
-                    node.l = None
+                    node.del_node("l")
                     return
                 delete(node.l, key)
             if node.r:
                 if node.r.key == key:
-                    node.r = None
+                    node.del_node("r")
                     return
                 delete(node.r, key)
 
@@ -221,42 +357,17 @@ class BinaryTree:
                 return
             delete(self.root, key)
 
-    def add_breadth_first(self, key):
+    def add_breadth_first(self, key: int):
         """
-        Default insertion method for binary trees.
+        Insert node.
 
-        Inserts a node into the first available place using breadth-first
-        search.
+        This is the default add method for the base class. It creates a new node in
+        the place of the first missing space when traversed breadth-first.
 
-        All insertion methods return the depth of the node inserted
-
-        >>> tree = BinaryTree.BTNode()
-        >>> for x in range(0, 5):
-        ...     tree.add(x)
-        ...     print(tree)
-        0
-         0
-        1
-           0
-         ┌─┘
-         1
-        1
-           0
-         ┌─┴─┐
-         1   2
-        2
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┘
-         3
-        2
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐
-         3   4
-
+        Parameters
+        ----------
+        key : int
+            Key of node to be inserted.
         """
         if not self.root:
             self.add_root(key)
@@ -269,35 +380,20 @@ class BinaryTree:
                 node.add_node(key, "r")
                 return
 
-    def is_perfect(self):
+    def is_perfect(self) -> bool:
         """
-        Returns true if self satisfies the definition of a perfect binary tree.
+        Check if tree is perfect.
 
-        A perfect binary tree is any binary tree where each internal node has
-        exactly two children and each external node has the same depth.
+        A binary tree is perfect if every internal node has two children and all the
+        leaf nodes are on the same level.
 
-        >>> tree = bt_example(3)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┘
-         3   4   5
-        >>> tree.is_perfect()
-        False
-        >>> tree.add(6)
-        2
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> tree.is_perfect()
-        True
+        Returns
+        -------
+        bool
+            True if tree satisfies definion of perfect tree.
         """
 
-        def node_is_perfect(node):
+        def node_is_perfect(node: BTNode) -> bool:
             # Height of 0
             if not node.l and not node.r:
                 return True
@@ -317,43 +413,19 @@ class BinaryTree:
             return
         return node_is_perfect(self.root)
 
-    def is_full(self):
+    def is_full(self) -> bool:
         """
-        Returns true if self is a full binary tree.
+        Check if tree is full.
 
-        A full binary is defined as any tree in which every node has either
-        two or no children.
+        A binary tree is full if every node has either 0 or 2 children.
 
-        >>> tree = bt_example(4)
-        >>> print(tree)
-           0
-         ┌─┴─┐
-         1   2
-        >>> tree.is_full()
-        True
-        >>> tree.add(3)
-        2
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┘
-         3
-        >>> tree.is_full()
-        False
-        >>> tree.add(4)
-        2
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐
-         3   4
-        >>> tree.is_full()
-        True
+        Returns
+        -------
+        bool
+            True if tree satisfies definition of full tree.
         """
 
-        def rec_is_full(node):
+        def rec_is_full(node: BTNode) -> bool:
             # No children
             if not node.l and not node.r:
                 return True
@@ -367,52 +439,17 @@ class BinaryTree:
             return
         return rec_is_full(self.root)
 
-    def is_complete(self):
+    def is_complete(self) -> bool:
         """
-        Returns true if self is a complete binary tree.
+        Check if tree is complete.
 
-        A tree is defined as complete if each level of the tree is full except
-        possibly the last level, which must be filled from the left. A tree
-        which is constructed only with .add_breadth_first with no nodes
-        removed will always be complete.
+        A binary tree is complete if every space in every level of the tree is filled,
+        except possibly the lowest level which must be filled from the left.
 
-        >>> tree = bt_example(3)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┘
-         3   4   5
-        >>> tree.is_complete()
-        True
-        >>> tree.r.add_r(6)
-        2
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> tree.is_complete()
-        True
-        >>> tree.r.l.delete()
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐     └─┐
-         3   4       6
-        >>> tree.is_complete()
-        False
-        >>> tree.r.delete()
-        >>> print(tree)
-               0
-           ┌───┘
-           1
-         ┌─┴─┐
-         3   4
-        >>> tree.is_complete()
-        False
+        Returns
+        -------
+        bool
+            True if tree satisfies definition of complete tree.
         """
         if not self.root:
             return
@@ -439,43 +476,17 @@ class BinaryTree:
                     return False
         return True
 
-    def is_balanced(self):
+    def is_balanced(self) -> bool:
         """
-        Returns True if self is a balanced binary tree.
+        Check if tree is balanced.
 
-        A binary tree is defined as balanced if the difference in height of
-        each child of each node is no more than 1. Height is defined as the
-        maximum distance to a leaf (external) node where leaf nodes have a
-        height of 0.
+        A binary tree is balanced if the difference between the height of the children
+        of each node is no greater than 1 and no less than -1.
 
-        >>> tree = bt_example(2)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐
-         3   4
-
-        The left subtree of the root has a height of 1. The right subtree
-        is a leaf and so has a height of 0. Therefore it is considered
-        balanced.
-
-        >>> tree.is_balanced()
-        True
-        >>> tree.r.delete()
-        >>> print(tree)
-               0
-           ┌───┘
-           1
-         ┌─┴─┐
-         3   4
-
-        This time, the right subtree of the root doesn't exist and so is
-        considered to have a height of -1. The difference between -1 and 1 is
-        greater than 1, therefore this tree is not balanced.
-
-        >>> tree.is_balanced()
-        False
+        Returns
+        -------
+        bool
+            True if the tree satisfies the definition of a balanced tree.
         """
         if not self.root:
             return True
@@ -486,23 +497,17 @@ class BinaryTree:
                 return False
         return True
 
-    def breadth_first(self):
+    def breadth_first(self) -> Iterator[BTNode]:
         """
-        Returns a left -> right, top -> bottom iterator.
+        Breadth-first traversal.
 
-        This iteration method, while slightly more complex than preorder,
-        inorder and postorder operations, is needed for binary search tree and
-        complete tree operations.
+        Returns an iterator which provides all the nodes in the tree from top to
+        bottom, left to right.
 
-        >>> tree = bt_example(0)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> list(node.key for node in tree.breadth_first())
-        [0, 1, 2, 3, 4, 5, 6]
+        Returns
+        -------
+        Iterator[BTNode]
+            Yields all the nodes of the tree in breadth-first priority.
         """
         if self.root:
             yield self.root
@@ -519,23 +524,21 @@ class BinaryTree:
                 if node.r:
                     queue.enqueue(node.r)
 
-    def flatten(self):
+    def flatten(self) -> Iterator[BTNode]:
         """
-        Returns an inorder iterator for the children of self.
+        In-order traversal.
 
-        >>> tree = bt_example(0)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> list(node.key for node in tree.flatten())
-        [3, 1, 4, 0, 5, 2, 6]
+        Returns an iterator which provides all the nodes in the tree in in-order
+        priority. In-order priority is left child -> node -> right child.
+
+        Returns
+        -------
+        Iterator[BTNode]
+            Yields all nodes in tree in in-order priority.
         """
         if self.root:
 
-            def rec_flatten(node):
+            def rec_flatten(node: BTNode) -> Iterator[BTNode]:
                 if node.l:
                     for n in rec_flatten(node.l):
                         yield n
@@ -547,23 +550,21 @@ class BinaryTree:
             for n in rec_flatten(self.root):
                 yield n
 
-    def preorder(self):
+    def preorder(self) -> Iterator[BTNode]:
         """
-        Returns a preorder iterator for the children of self.
+        Pre-order traversal.
 
-        >>> tree = bt_example(0)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> list(node.key for node in tree.preorder())
-        [0, 1, 3, 4, 2, 5, 6]
+        Returns an iterator which provides all the nodes in the tree in preorder
+        priority. Preorder priority is node -> left child -> right child.
+
+        Returns
+        -------
+        Iterator[BTNode]
+            Yields all nodes in tree in preorder priority.
         """
         if self.root:
 
-            def rec_preorder(node):
+            def rec_preorder(node: BTNode) -> Iterator[BTNode]:
                 yield node
                 if node.l:
                     for n in rec_preorder(node.l):
@@ -575,23 +576,21 @@ class BinaryTree:
             for n in rec_preorder(self.root):
                 yield n
 
-    def postorder(self):
+    def postorder(self) -> Iterator[BTNode]:
         """
-        Returns a postorder iterator for the children of self.
+        Post-order traversal.
 
-        >>> tree = bt_example(0)
-        >>> print(tree)
-               0
-           ┌───┴───┐
-           1       2
-         ┌─┴─┐   ┌─┴─┐
-         3   4   5   6
-        >>> list(node.key for node in tree.postorder())
-        [3, 4, 1, 5, 6, 2, 0]
+        Returns an iterator which provides all the nodes in the tree in postorder
+        priority. Postorder priority is left child -> right child -> node.
+
+        Returns
+        -------
+        Iterator[BTNode]
+            Yields all nodes in tree in postorder priority.
         """
         if self.root:
 
-            def rec_postorder(node):
+            def rec_postorder(node: BTNode) -> Iterator[BTNode]:
                 if node.l:
                     for n in rec_postorder(node.l):
                         yield n
@@ -604,10 +603,35 @@ class BinaryTree:
                 yield n
 
     def display(self):
+        """
+        Render tree to console.
+
+        Prints a visual representation of the tree to the console. Reccommended for
+        use with trees no greater than 31 nodes, depending on the width of the console.
+
+        Implementation logic can be found at ./util/util.py
+        """
         print(util.display(self))
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        To string.
+
+        Returns
+        -------
+        str
+            Returns a string representation of the tree.
+        """
         return util.display(self)
 
-    def inspect(self):
+    def inspect(self) -> str:
+        """
+        Inspect tree.
+
+        Returns
+        -------
+        str
+            For testing and internal use. Returns a formatted list of the contents of
+            the tree.
+        """
         return util.inspect(self)
