@@ -1,62 +1,143 @@
+from typing import Any
+
+
 class Queue:
     """
-    FIFO Queue.
+    Queue.
 
-    This representation of the queue handles enqueue, dequeue, is_empty, \
-    is_full, peek, extend, __str__ and __iter__ methods. For example:
+    A first in first out (FIFO) data structure.
 
-    >>> queue = Queue(max_size = 3)
-    >>> queue.is_empty()
-    True
-    >>> queue.enqueue(2)
-    >>> print(queue)
-    [2]
-    >>> queue.extend([4, 6])
-    >>> print(queue)
-    [2, 4, 6]
-    >>> queue.is_full()
-    True
-    >>> queue.dequeue()
-    2
-    >>> print(queue)
-    [4, 6]
-    >>> queue.peek()
-    4
-    >>> for x in queue: print(x * 2)
-    8
-    12
+    ...
+
+    Attributes
+    ---------
+    data : list[Any]
+        List of items to initialise the queue with.
+    max_size : int
+        Upper bounds of the size of the queue.
+
+    Methods
+    -------
+    is_empty() -> bool
+        Returns True if the queue is empty.
+    is_full() -> bool
+        Returns True if the queue is full.
+    enqueue(x: Any)
+        Insert an item at the end of the queue.
+    dequeue() -> Any
+        Remove and return the item at the front of the queue.
+    peek() -> Any
+        Return the item at the front of the queue.
+    extend(data: list[Any])
+        Insert multiple items at the end of the queue in order.
+    __str__ -> str
+        Return a string representation of the queue data.
     """
 
-    def __init__(self, data=[], max_size=-1):
+    def __init__(self, data: list[Any] = [], max_size: int = -1):
+        """
+        __init__.
+
+        Parameters
+        ----------
+        data : list[Any]
+            List of items to initialise the queue with.
+        max_size : int
+            Upper bounds of the size of the queue.
+        """
         self.data = []
         self.max_size = max_size
         self.extend(data)
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
+        """
+        Is empty.
+
+        Returns
+        -------
+        bool
+            Returns True if there are no items in the queue.
+
+        """
         return len(self.data) == 0
 
-    def is_full(self):
+    def is_full(self) -> bool:
+        """
+        Is full.
+
+        Returns
+        -------
+        bool
+            Returns True if the queue is full.
+        """
         return len(self.data) == self.max_size
 
-    def enqueue(self, x):
+    def enqueue(self, x: Any):
+        """
+        Insert item at end of queue.
+
+        Parameters
+        ----------
+        x : Any
+            Item to be inserted.
+
+        Raises
+        -----
+        Exception
+            If queue is full.
+        """
         if self.is_full():
             raise Exception("Queue full, cannot enqueue", x)
         self.data.append(x)
 
-    def dequeue(self):
+    def dequeue(self) -> Any:
+        """
+        Remove and return item at start of queue.
+
+        Returns
+        -------
+        Any
+            Item at start of queue.
+
+        Raises
+        -----
+        Exception
+            If queue is empty.
+        """
         if self.is_empty():
             raise Exception("Queue empty, cannot dequeue")
         return self.data.pop(0)
 
-    def peek(self):
+    def peek(self) -> Any:
+        """
+        Peek.
+
+        Returns
+        -------
+        Any
+            The item at the start of the queue.
+        """
         return self.data[0]
 
-    def extend(self, arr):
-        for x in arr:
+    def extend(self, data: list[Any]):
+        """
+        Insert multiple items.
+
+        Parameters
+        ----------
+        data : list[Any]
+            List of items to be inserted at the end of the queue in order.
+        """
+        for x in data:
             self.enqueue(x)
 
-    def __str__(self):
-        return str(self.data)
+    def __str__(self) -> str:
+        """
+        __str__.
 
-    def __iter__(self):
-        return (x for x in self.data)
+        Returns
+        -------
+        str
+            String representation of queue data.
+        """
+        return str(self.data)
