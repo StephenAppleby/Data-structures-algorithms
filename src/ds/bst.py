@@ -1,74 +1,114 @@
+from __future__ import annotations
 from math import ceil
 from .bt import BinaryTree
 
 
 class BinarySearchTree(BinaryTree):
-    def __init__(self, **kwargs):
-        data = []
-        if "data" in kwargs:
-            data = kwargs.pop("data")
-        super().__init__(**kwargs)
+    """
+    Binary search tree (bst).
+
+    This implementation of the binary search tree extends the BinaryTree base class.
+    The methods add and delete methods provided will guarantee that a tree made with
+    them satisfies the definition of a binary search tree: All node keys are sorted in
+    order of smallest to largest when the nodes of the tree are traversed in-order.
+
+    Binary search trees are optimised for data lookup speed. If the tree is balanced,
+    then the worst case lookup time for a node is O = log(n). If a bst is not balanced,
+    this property cannot be guaranteed.
+
+    This implementation includes a balance method, which doubles as an extend method.
+    This method simply converts the nodes of the tree into a list, appends the contents
+    of the list passed to it, then creates a new bst with the result. This approach
+    requires touching every node in the tree (O = n) and is therefore impractical. For
+    any practical purposes, a self-balancing tree such as an AVL tree is required (see
+    ./avl.py)
+
+    ...
+
+    Methods
+    -------
+    add_bst(key: int)
+        Insert a new node with key into the tree while maintaining bst properties. Does
+        not guarantee tree balance.
+    balance(data: list[int] = [])
+        Converts the nodes of the tree into a sorted list, appends the contents of
+        data then creates a new balanced bst from the contents.
+    get_bst(key: int)
+        Retrieve the node with key if present, raise KeyError if not. Lookup time
+        is O = log(n) if the tree is balanced.
+    delete_bst(key: int)
+        Delete a node from the tree. Does not remove the whole subtree, but rearranges
+        the tree to maintain in-order sorted property. Does not guarantee tree balance.
+    is_bst() -> bool
+        Returns true if all the keys of the nodes of the tree are sorted from smallest
+        to largest when traversed in in-order priority.
+    """
+
+    def __init__(self, root: BTNode = None, data: list[int] = []):
+        """
+        __init__.
+
+        Parameters
+        ----------
+        root : BTNode
+            Node to itialise the root of the tree.
+        data : list[int]
+            List of keys to create initial bst from.
+        """
+        super().__init__(root=root)
+        # Add method aliases
         self.add = self.add_bst
         self.extend = self.balance
         self.delete = self.delete_bst
         self.get = self.get_bst
+        # Create initial bst
         self.extend(data=data)
 
-    def add_bst(self, key):
+    def add_bst(self, key: int):
+        """
+        Insert node.
+
+        Insert a new node with key into the tree while maintaining bst properties. Does
+        not guarantee tree balance.
+
+        Parameters
+        ----------
+        key : int
+            Key of node to be inserted
+        """
+
         def rec_add(node, key):
             if key == node.key:
                 raise Exception("Duplicates not allowed in binary search tree")
             if key < node.key:
                 if node.l:
-                    return rec_add(node.l, key)
+                    rec_add(node.l, key)
                 else:
                     node.add_node(key, "l")
-                    return node.l
             if key > node.key:
                 if node.r:
-                    return rec_add(node.r, key)
+                    rec_add(node.r, key)
                 else:
                     node.add_node(key, "r")
-                    return node.r
 
         if not self.root:
             self.add_root(key)
-            return self.root
-        return rec_add(self.root, key)
+        else:
+            rec_add(self.root, key)
 
-    def balance(self, data=[]):
+    def balance(self, data: list[int] = []):
         """
-        If self is not balanced, rearrange nodes such that it is balanced.
+        Balance the tree.
 
-        This implementation will prioritise placing nodes on the left. This
-        method is used as the default extend behaviour, to efficiently
-        maintain balance after adding multiple nodes at once.
+        Converts the nodes of the tree into a sorted list, appends the contents of
+        data then creates a new balanced bst from the contents.
 
-        >>> bst = bst_example(3)
-        >>> print(bst)
-                                       3
-                       ┌───────────────┴───────────────┐
-                       1                               4
-               ┌───────┴───────┐                       └───────┐
-               0               2                               5
-                                                               └───┐
-                                                                   6
-                                                                   └─┐
-                                                                     7
-        >>> bst.is_balanced()
-        False
-        >>> bst.balance()
-        >>> print(bst)
-                       4
-               ┌───────┴───────┐
-               2               6
-           ┌───┴───┐       ┌───┴───┐
-           1       3       5       7
-         ┌─┘
-         0
-        >>> bst.is_balanced()
-        True
+        Parameters
+        ----------
+        data : list[int]
+            A list of nodes to be added to the bst
         """
+
         old_nodes = [] if not (ar := self.flatten()) else ar
         nodes = sorted(data + [node.key for node in old_nodes])
         if len(nodes) == 0:
@@ -76,10 +116,10 @@ class BinarySearchTree(BinaryTree):
         self.root = self.BTNode(nodes.pop(len(nodes) // 2))
 
         def build(node, keys):
-            if (vals_len := len(keys)) == 0:
+            if (keys_len := len(keys)) == 0:
                 return
-            left_vals = keys[0 : (half_vals_len := ceil(vals_len / 2))]
-            right_vals = keys[half_vals_len:]
+            left_vals = keys[0 : (half_keys_len := ceil(keys_len / 2))]
+            right_vals = keys[half_keys_len:]
             if len(left_vals) > 0:
                 node.l = self.BTNode(left_vals.pop(len(left_vals) // 2))
                 build(node.l, left_vals)
@@ -89,52 +129,27 @@ class BinarySearchTree(BinaryTree):
 
         build(self.root, nodes)
 
-    def get_bst(self, key):
+    def get_bst(self, key: int) -> BTNode:
         """
-        Binary search algorithm.
+        Get node.
 
-        Structuring data in a binary search tree allows the use of this
-        look-up method which halves the number of remaining possibilities with
-        each iteration leading to a computational complexity of Olog(n). This
-        is why the binary search tree is so commonly used when lookup speed is
-        key.
+        Retrieve the node with key if present, raise KeyError if not. Lookup time
+        is O = log(n) if the tree is balanced.
 
-        Note that the balance of the tree is also important for keeping lookup
-        time low. Consider this poorly balanced binary search tree:
-        >>> bst = bst_example(2)
-        >>> print(bst)
-                                       0
-                                       └───────────────┐
-                                                       1
-                                                       └───────┐
-                                                               2
-                                                               └───┐
-                                                                   3
-                                                                   └─┐
-                                                                     4
+        Parameters
+        ----------
+        key : int
+            Key to find
 
-        This linear bst is no better than an array and access time is now
-        On. Here we have 5 elements and the maximum number of nodes traversed
-        in order to locate a node is 5. On the other hand, consider this
-        well balanced bst:
-        >>> bst = bst_example(1)
-        >>> print(bst)
-                       7
-               ┌───────┴───────┐
-               3              11
-           ┌───┴───┐       ┌───┴───┐
-           1       5       9      13
-         ┌─┴─┐   ┌─┴─┐   ┌─┴─┐   ┌─┴─┐
-         0   2   4   6   8  10  12  14
+        Returns
+        -------
+        BTNode
+            The node to be returned if found.
 
-        Here there are 14 elements and each can be reached within 4 of the
-        root.
-
-        For this reason we have self-balancing trees like the AVL tree and the
-        Red-Black tree. This basic implementation however does not include
-        any advanced self-balancing techniques, but does rebalance when adding
-        multiple elements at once, however in a slower fashion than a proper
-        self-balancing tree.
+        Raises
+        ------
+        KeyError
+            If there is no node with the key in the tree.
         """
 
         def rec_get(node, key):
@@ -152,38 +167,20 @@ class BinarySearchTree(BinaryTree):
             raise KeyError(f"{key} not in tree")
         return found
 
-    def delete_bst(self, key):
+    def delete_bst(self, key: int):
         """
-        Remove node from tree.
+        Delete node from tree.
 
-        When removing nodes from a binary search tree, it helps to recognise
-        the difference between the structure of the tree and the position of
-        its keys. In every case of deleting a node, the structure will
-        contain one less node than before, but in several cases the position
-        of the keys in the tree will need to change as well.
+        Delete a node from the tree. Does not remove the whole subtree, but rearranges
+        the tree to maintain in-order sorted property. Does not guarantee tree balance.
 
-        In order to ensure that the tree that self is a part of adheres to the
-        definition of a binary search tree, three cases need to be taken into
-        account. The first is if self is a leaf node, in which case it is
-        simply removed from the tree. The second is in the case that self has
-        one child, in which case the child is attached to the parent of self
-        in it's place. If self has two children, we need to identify the
-        inorder successor of self by taken the left-most child of the right
-        child of self, and switching it into the place of self.
-
-        >>> bst = bst_example(1)
-        >>> print(bst)
-                       7
-               ┌───────┴───────┐
-               3              11
-           ┌───┴───┐       ┌───┴───┐
-           1       5       9      13
-         ┌─┴─┐   ┌─┴─┐   ┌─┴─┐   ┌─┴─┐
-         0   2   4   6   8  10  12  14
-
+        Parameters
+        ----------
+        key : int
+            Key of node to be deleted
         """
 
-        def rec_del(node):
+        def rec_del(node: BTNode) -> BTNode:
             if key == node.key:
                 return get_replacement(node)
             elif node.l and key < node.key:
@@ -194,27 +191,29 @@ class BinarySearchTree(BinaryTree):
                 raise Exception("Attempted to delete missing key from tree:", key)
             return node
 
-        def get_replacement(node):
+        def get_replacement(node: BTNode) -> BTNode:
             # Determine which children are present
             kids = ""
             if node.l:
                 kids += "l"
             if node.r:
                 kids += "r"
-            # No children
+            # No children -> Simply delete the node
             if kids == "":
                 return None
-            # One child
+            # One child -> Simply return the child to replace it
             if kids == "l":
                 return node.l
             if kids == "r":
                 return node.r
             # Two children -> Find successor
-            # Successor is node.r
+            # If the nodes right child has no left child, then the nodes right child
+            # is it's successor
             if not node.r.l:
                 node.r.attach_node(node.l, "l")
                 return node.r
-            # Successor is not node.r
+            # If the nodes right child has a left child, then we travel down to the
+            # left from the nodes right child until we find a node with no left child.
             parent = node.r
             successor = node.r.l
             while successor.l:
@@ -224,13 +223,21 @@ class BinarySearchTree(BinaryTree):
             parent.attach_node(successor.r, "l")
             successor.attach_node(node.l, "l")
             successor.attach_node(node.r, "r")
+            # Return the altered successor
             return successor
 
         self.root = rec_del(self.root)
 
-    def is_bst(self):
-        """
-        Returns True if self satisfies the definition of a binary search tree.
+    def is_bst(self) -> bool:
+        """is_bst.
+
+        Returns true if all the keys of the nodes of the tree are sorted from smallest
+        to largest when traversed in in-order priority.
+
+        Returns
+        -------
+        bool
+            True if the tree satisfies the definition of a binary search tree.
         """
         nodes = list(self.flatten())
         return all(nodes[i].key < nodes[i + 1].key for i in range(len(nodes) - 1))

@@ -10,7 +10,6 @@ from ds.dcqueue import DynamicCircularQueue
 from ds.bt import BinaryTree
 from ds.bst import BinarySearchTree
 from ds.avl import AVLTree
-from ds.btheap import BTHeap
 from ds.heap import Heap
 
 
@@ -251,6 +250,18 @@ class TestBST(unittest.TestCase):
         self.assertEqual(str(bst), expectations["bst_balance_A"])
         bst.balance([10, 20, 30, 40])
         self.assertEqual(str(bst), expectations["bst_balance_B"])
+
+    def test_stress(self):
+        repetitions = 20
+        size = 80
+        for x in range(repetitions):
+            candidates = [x for x in range(1000)]
+            data = []
+            for y in range(size):
+                data.append(candidates.pop(random.randint(0, len(candidates) - 1)))
+            bst = BinarySearchTree(data=data)
+            self.assertTrue(bst.is_balanced())
+            self.assertTrue(bst.is_bst())
 
     def test_delete(self):
         bst = BinarySearchTree().preset(15)
