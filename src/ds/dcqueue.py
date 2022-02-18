@@ -1,22 +1,54 @@
+from __future__ import annotations
 from .cqueue import CircularQueue
+from typing import Any
 
 
 class DynamicCircularQueue(CircularQueue):
-    """Dynamic implementation of CircularQueue.
+    """
+    Dynamic circular queue.
 
-    >>> dcqueue = DCQueue(size=3)
-    >>> dcqueue.enqueue(3)
-    >>> print(dcqueue)
-    [3, None, None]
-    >>> dcqueue.extend([x for x in range(4)])
-    >>> print(dcqueue)
-    [3, 0, 1, 2, 3, None]
+    A dynamic implementation of the circular queue. This implementation overrides the
+    handle_overflow and handle_full methods to resize the queue to fit changing needs.
+
+    The resizing of the queue upon overflow is not a very efficient algorithm (O = n)
+    but happens infrequently enough that the benefits far outweight the downsides.
+
+    ...
+
+    Methods
+    -------
+    handle_overflow(x: Any)
+        Dequeues all items from the queue into a temporary buffer, doubles the size of
+        the queue and adds all items in the buffer back into the queue before
+        enqueueing the item x passed in.
+    handle_empty()
+        Dynamically resizes the queue to a size of 8 upon empty.
     """
 
     def __init__(self, data=[]):
+        """
+        __init__.
+
+        Parameters
+        ----------
+        data : list[Any]
+            List of items to initialise the queue with.
+        """
         super().__init__(data=data, max_size=8)
 
-    def handle_full(self, x):
+    def handle_overflow(self, x: Any):
+        """
+        Handle overflow.
+
+        Dequeues all items from the queue into a temporary buffer, doubles the size of
+        the queue and adds all items in the buffer back into the queue before
+        enqueueing the item x passed in.
+
+        Parameters
+        ----------
+        x : Any
+            The item attempted to be enqueued.
+        """
         old_data = []
         old_max = self.max_size
         while len(self) > 0:
@@ -27,7 +59,12 @@ class DynamicCircularQueue(CircularQueue):
         for d in old_data:
             self.enqueue(d)
 
-    def initialise_empty(self):
+    def handle_empty(self):
+        """
+        Handle empty.
+
+        Dynamically resizes the queue to a size of 8 upon empty.
+        """
         self.max_size = 8
         self.data = [None] * self.max_size
         self.head = self.tail = -1
