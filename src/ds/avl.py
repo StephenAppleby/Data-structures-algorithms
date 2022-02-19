@@ -9,6 +9,35 @@ class AVLTree(BinarySearchTree):
 
     A self balancing implementation of the binary search tree.
 
+    Example:
+    >>> avl = AVLTree(data=[x for x in range(9)])
+    >>> avl.display()
+                   3
+           ┌───────┴───────┐
+           1               5
+       ┌───┴───┐       ┌───┴───┐
+       0       2       4       7
+                             ┌─┴─┐
+                             6   8
+    >>> avl.delete(3)
+    >>> avl.display()
+                   4
+           ┌───────┴───────┐
+           1               7
+       ┌───┴───┐       ┌───┴───┐
+       0       2       5       8
+                       └─┐
+                         6
+    >>> avl.extend([x for x in range(10, 15)])
+    >>> avl.display()
+                   7
+           ┌───────┴───────┐
+           4              12
+       ┌───┴───┐       ┌───┴───┐
+       1       5      10      13
+     ┌─┴─┐     └─┐   ┌─┴─┐     └─┐
+     0   2       6   8  11      14
+
     ...
 
     Attributes
