@@ -11,6 +11,41 @@ class Heap:
     for a min heap. The rest of the array is only loosely ordered; order is not
     guaranteed.
 
+    Example:
+
+    >>> import random
+    >>> data = []
+    >>> for x in range(15):
+    ...     data.append(random.randint(0, 99))
+    ...
+    >>> print(data)
+    [50, 32, 54, 16, 51, 57, 34, 85, 0, 76, 81, 81, 52, 59, 48]
+    >>> heap = Heap(data=data)
+    >>> heap.display()
+                  85
+           ┌───────┴───────┐
+          81              81
+       ┌───┴───┐       ┌───┴───┐
+      32      76      57      59
+     ┌─┴─┐   ┌─┴─┐   ┌─┴─┐   ┌─┴─┐
+    16   0  50  51  54  52  34  48
+    >>> for x in range(5):
+    ...     print(heap.pop())
+    ...
+    85
+    81
+    81
+    76
+    59
+    >>> heap.display()
+                  57
+           ┌───────┴───────┐
+          52              54
+       ┌───┴───┐       ┌───┴───┐
+      32      51      34      48
+     ┌─┴─┐   ┌─┘
+    16   0  50
+
     ...
 
     Attributes
