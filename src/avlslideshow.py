@@ -309,7 +309,7 @@ class AVL_Slideshow(avl.AVLTree):
 if __name__ == "__main__":
     tree = AVL_Slideshow()
     try:
-        tree.play(size=29, initial=14, pause_factor=0.25)
+        tree.play(size=29, initial=14, pause_factor=1)
     except Exception:
         print("\n".join(log))
         raise
