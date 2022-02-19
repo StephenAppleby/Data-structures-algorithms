@@ -19,11 +19,29 @@ class CircularQueue:
     problem with this approach is that the size of the queue is fixed, which is
     impractical for many purposes. For a dynamic implementation, see ./dcqueue.py.
 
+    Example:
+
+    >>> queue = CircularQueue(data=[x for x in range(6)])
+    >>> print(queue)
+    [0, 1, 2, 3, 4, 5]
+    >>> for x in range(4):
+    ...     print(queue.dequeue())
+    ...
+    0
+    1
+    2
+    3
+    >>> print(queue)
+    [4, 5]
+    >>> queue.extend([x for x in range(6, 10)])
+    >>> print(queue)
+    [4, 5, 6, 7, 8, 9]
+
     ...
 
     Attributes
     ---------
-    max_size : int
+    max_size : int = 8
         The upper bounds of the size of the queue.
     data : list[Any]
         The contents of the queue.
@@ -209,7 +227,7 @@ class CircularQueue:
         str
             Returns a string representation of the queue.
         """
-        return str(list(self.iter()))
+        return str(list(self.__iter__()))
 
     def __len__(self) -> int:
         """
@@ -250,3 +268,4 @@ class CircularQueue:
             while i != self.tail:
                 yield self.data[i]
                 i = (i + 1) % self.max_size
+            yield self.data[i]
