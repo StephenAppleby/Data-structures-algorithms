@@ -22,7 +22,9 @@ class BinaryTree:
     a binary tree to the console
 
     The binary tree can be rendered to the console with the display() method. The logic
-    for this implementation can be found in ./util/util.py. For example:
+    for this implementation can be found in ./util/util.py.
+
+    Example:
 
     >>> tree = BinaryTree().preset(7)
     >>> tree.display()
@@ -31,6 +33,24 @@ class BinaryTree:
        1       2
      ┌─┴─┐   ┌─┴─┐
      3   4   5   6
+    >>> tree.extend([x for x in range(7, 15)])
+    >>> tree.display()
+                   0
+           ┌───────┴───────┐
+           1               2
+       ┌───┴───┐       ┌───┴───┐
+       3       4       5       6
+     ┌─┴─┐   ┌─┴─┐   ┌─┴─┐   ┌─┴─┐
+     7   8   9  10  11  12  13  14
+    >>> tree.delete(5)
+    >>> tree.display()
+                   0
+           ┌───────┴───────┐
+           1               2
+       ┌───┴───┐           └───┐
+       3       4               6
+     ┌─┴─┐   ┌─┴─┐           ┌─┴─┐
+     7   8   9  10          13  14
 
     ...
 
