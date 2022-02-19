@@ -13,6 +13,24 @@ class DynamicCircularQueue(CircularQueue):
     The resizing of the queue upon overflow is not a very efficient algorithm (O = n)
     but happens infrequently enough that the benefits far outweight the downsides.
 
+    Example:
+
+    >>> queue = DynamicCircularQueue(data=[x for x in range(6)])
+    >>> print(queue)
+    [0, 1, 2, 3, 4, 5]
+    >>> for x in range(4):
+    ...     print(queue.dequeue())
+    ...
+    0
+    1
+    2
+    3
+    >>> print(queue)
+    [4, 5]
+    >>> queue.extend([x for x in range(6, 20)])
+    >>> print(queue)
+    [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
     ...
 
     Methods
