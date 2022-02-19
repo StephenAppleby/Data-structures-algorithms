@@ -23,6 +23,36 @@ class BinarySearchTree(BinaryTree):
     any practical purposes, a self-balancing tree such as an AVL tree is required (see
     ./avl.py)
 
+    Example:
+
+    >>> bst = BinarySearchTree().preset(9)
+    >>> bst.display()
+                   4
+           ┌───────┴───────┐
+           2               7
+       ┌───┴───┐       ┌───┴───┐
+       1       3       6       8
+     ┌─┘             ┌─┘
+     0               5
+    >>> bst.delete(7)
+    >>> bst.display()
+                   4
+           ┌───────┴───────┐
+           2               8
+       ┌───┴───┐       ┌───┘
+       1       3       6
+     ┌─┘             ┌─┘
+     0               5
+    >>> bst.balance()
+    >>> bst.display()
+                   4
+           ┌───────┴───────┐
+           2               6
+       ┌───┴───┐       ┌───┴───┐
+       1       3       5       8
+     ┌─┘
+     0
+
     ...
 
     Methods
