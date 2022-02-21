@@ -1,6 +1,6 @@
 # Data structures and algorithms
 
-![AVL self balancing binary search tree visualiser](https://github.com/StephenAppleby/Data-structures-algorithms/blob/master/avl.gif | width = 200)
+![AVL self balancing binary search tree visualiser](https://github.com/StephenAppleby/Data-structures-algorithms/blob/master/avl.gif | width=200)
 
 A collection of data structures and algorithms implemented in Python to demonstrate my understanding of core computer science concepts.
 
