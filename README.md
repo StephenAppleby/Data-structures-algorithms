@@ -1,6 +1,6 @@
 # Data structures and algorithms
 
-<img src="/avl.gif" width="500" height="220"/>
+<img style="text-align: centre" src="/avl.gif" width="500" height="220"/>
 
 A collection of data structures and algorithms implemented in Python to demonstrate my understanding of core computer science concepts.
 
