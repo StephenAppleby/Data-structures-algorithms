@@ -276,14 +276,18 @@ class AVL_Slideshow(avl.AVLTree):
             del_node.style = ""
         self.add_slide("Finish\n", 2)
 
-    def show(self, pause_factor=1):
+    def show(self, pause_factor=1, wait=False):
         for slide in self.get_slides():
-            clear()
-            if slide["title"]:
-                print(slide["title"])
-            slide["tree"].display()
-            print("\n".join(log))
-            sleep(slide["pause"] * pause_factor)
+            for _ in range(slide["pause"]):
+                clear()
+                if slide["title"]:
+                    print(slide["title"])
+                slide["tree"].display()
+                print("\n".join(log))
+                if wait:
+                    input()
+                else:
+                    sleep(1 * pause_factor)
 
     def play(self, size=15, initial=5, pause_factor=1):
         numbers = [x for x in range(1000)]
