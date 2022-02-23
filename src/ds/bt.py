@@ -18,9 +18,6 @@ class BinaryTree:
     returning iterators over the nodes of the tree in breadth_first, inorder(flatten),
     preorder and postorder priorities.
 
-    This base class also uses an implementation defined in ./util/util.py for rendering
-    a binary tree to the console
-
     The binary tree can be rendered to the console with the display() method. The logic
     for this implementation can be found in ./util/util.py.
 

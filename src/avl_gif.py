@@ -8,4 +8,4 @@ for x in cycle:
     tree.add(x)
 for x in cycle:
     tree.delete(x)
-tree.show(wait=True)
+tree.show()
